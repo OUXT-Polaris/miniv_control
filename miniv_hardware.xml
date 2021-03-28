@@ -1,0 +1,9 @@
+<library path="miniv_hardware">
+  <class name="miniv_hardware/MiniVHardware"
+         type="miniv_control::MiniVHardware"
+         base_class_type="hardware_interface::SystemInterface">
+    <description>
+      A mini-v hardware plugin for the ros2_control.
+    </description>
+  </class>
+</library>
