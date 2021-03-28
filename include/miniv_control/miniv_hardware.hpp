@@ -27,6 +27,8 @@
 #include <rclcpp/rclcpp.hpp>
 
 #include <vector>
+#include <memory>
+#include <string>
 
 using hardware_interface::return_type;
 

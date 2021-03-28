@@ -16,6 +16,11 @@
 
 #include <hardware_interface/types/hardware_interface_type_values.hpp>
 
+#include <string>
+#include <memory>
+#include <limits>
+#include <vector>
+
 namespace miniv_control
 {
 MiniVHardware::~MiniVHardware()
