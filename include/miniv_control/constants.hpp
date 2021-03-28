@@ -16,6 +16,7 @@
 #define MINIV_CONTROL__CONSTANTS_HPP_
 
 #include <cmath>
+#include <cstdint>
 
 namespace miniv_control
 {
@@ -30,6 +31,18 @@ constexpr double TO_SPEED_RAD_PER_MIN = TO_SPEED_REV_PER_MIN * 2.0 * M_PI;
 constexpr double TO_SPEED_RAD_PER_SEC = TO_SPEED_RAD_PER_MIN / 60.0;
 constexpr double TO_LOAD_PERCENT = 0.1;
 constexpr double TO_VOLTAGE = 0.1;
+
+// Dynamixel XW54-T260 address table
+// Ref: https://emanual.robotis.com/docs/en/dxl/x/xw540-t260/
+constexpr uint16_t ADDR_TORQUE_ENABLE = 64;
+constexpr uint16_t ADDR_GOAL_POSITION = 116;
+// constexpr uint16_t ADDR_MOVING_SPEED = 32;
+constexpr uint16_t ADDR_PRESENT_POSITION = 132;
+constexpr uint16_t ADDR_PRESENT_SPEED = 128;
+// constexpr uint16_t ADDR_PRESENT_LOAD = 40;
+// constexpr uint16_t ADDR_PRESENT_VOLTAGE = 42;
+constexpr uint16_t ADDR_PRESENT_TEMPERATURE = 146;
+
 }  // namespace miniv_control
 
 #endif  // MINIV_CONTROL__CONSTANTS_HPP_
