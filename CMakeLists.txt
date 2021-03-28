@@ -29,6 +29,7 @@ add_library(
   ${LIBRARY_NAME}
   SHARED
   src/miniv_hardware.cpp
+  src/miniv_driver.cpp
 )
 target_include_directories(
   ${LIBRARY_NAME}
