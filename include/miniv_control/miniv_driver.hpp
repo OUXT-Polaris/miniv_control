@@ -15,4 +15,33 @@
 #ifndef MINIV_CONTROL__MINIV_DRIVER_HPP_
 #define MINIV_CONTROL__MINIV_DRIVER_HPP_
 
+#include <dynamixel_sdk/dynamixel_sdk.h>
+
+#include <string>
+#include <vector>
+#include <memory>
+
+namespace miniv_control
+{
+class MiniVDriver
+{
+public:
+  explicit MiniVDriver(
+    const std::string & serial_port_name,
+    const int & baudrate,
+    const uint8_t & left_dynamixel_id,
+    const uint8_t & right_dynamixel_id);
+  const bool without_dynamixel;
+  const std::string serial_port_name;
+  const int baudrate;
+  const uint8_t left_dynamixel_id;
+  const uint8_t right_dynamixl_id;
+
+private:
+  void openDynamixelPort() const;
+  std::shared_ptr<dynamixel::PortHandler> dxl_port_handler_;
+  std::shared_ptr<dynamixel::PacketHandler> dxl_packet_handler_;
+};
+}  // namespace miniv_control
+
 #endif  // MINIV_CONTROL__MINIV_DRIVER_HPP_

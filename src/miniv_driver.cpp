@@ -13,3 +13,33 @@
 // limitations under the License.
 
 #include <miniv_control/miniv_driver.hpp>
+
+namespace miniv_control
+{
+MiniVDriver::MiniVDriver(
+  const std::string & serial_port_name,
+  const int & baudrate,
+  const uint8_t & left_dynamixel_id,
+  const uint8_t & right_dynamixel_id)
+: without_dynamixel(false),
+  serial_port_name(serial_port_name),
+  baudrate(baudrate),
+  left_dynamixel_id(left_dynamixel_id),
+  right_dynamixl_id(right_dynamixl_id)
+{
+}
+
+void MiniVDriver::openDynamixelPort() const
+{
+  if (!dxl_port_handler_->openPort()) {
+    throw std::runtime_error(
+            std::string(__func__) + ": unable to open dynamixel port: " +
+            dxl_port_handler_->getPortName());
+  }
+  if (!dxl_port_handler_->setBaudRate(baudrate)) {
+    throw std::runtime_error(
+            std::string(__func__) + ": unable to set baudrate" +
+            std::to_string(dxl_port_handler_->getBaudRate()));
+  }
+}
+}  // namespace miniv_control
