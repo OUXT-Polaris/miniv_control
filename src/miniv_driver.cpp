@@ -37,6 +37,18 @@ MiniVDriver::MiniVDriver(
     dynamixel::PacketHandler::getPacketHandler(PROTOCOL_VERSION));
 }
 
+MiniVDriver::~MiniVDriver()
+{
+  if(!without_dynamixel) {
+    closeDynamixelPort();
+  }
+}
+
+void MiniVDriver::closeDynamixelPort() const
+{
+  dxl_port_handler_->closePort();
+}
+
 void MiniVDriver::openDynamixelPort() const
 {
   if (!dxl_port_handler_->openPort()) {

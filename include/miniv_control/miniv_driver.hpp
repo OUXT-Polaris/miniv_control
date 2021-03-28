@@ -31,6 +31,7 @@ public:
     const int & baudrate,
     const uint8_t & left_dynamixel_id,
     const uint8_t & right_dynamixel_id);
+  ~MiniVDriver();
   const bool without_dynamixel;
   const std::string dynamixel_port_name;
   const int baudrate;
@@ -39,6 +40,7 @@ public:
 
 private:
   void openDynamixelPort() const;
+  void closeDynamixelPort() const;
   std::shared_ptr<dynamixel::PortHandler> dxl_port_handler_;
   std::shared_ptr<dynamixel::PacketHandler> dxl_packet_handler_;
 };
