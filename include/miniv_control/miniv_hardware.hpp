@@ -11,3 +11,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
+#ifndef MINIV_CONTROL__MINIV_HARDWARE_HPP_
+#define MINIV_CONTROL__MINIV_HARDWARE_HPP_
+
+#endif  // MINIV_CONTROL__MINIV_HARDWARE_HPP_
