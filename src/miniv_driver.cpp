@@ -31,35 +31,63 @@ MiniVDriver::MiniVDriver(
   left_dynamixel_id(left_dynamixel_id),
   right_dynamixl_id(right_dynamixl_id)
 {
-  dxl_port_handler_ = std::shared_ptr<dynamixel::PortHandler>(
+  dynamixel_port_handler_ = std::shared_ptr<dynamixel::PortHandler>(
     dynamixel::PortHandler::getPortHandler(dynamixel_port_name.c_str()));
-  dxl_packet_handler_ = std::shared_ptr<dynamixel::PacketHandler>(
+  dynamixel_packet_handler_ = std::shared_ptr<dynamixel::PacketHandler>(
     dynamixel::PacketHandler::getPacketHandler(PROTOCOL_VERSION));
+  openDynamixelPort();
 }
 
 MiniVDriver::~MiniVDriver()
 {
-  if(!without_dynamixel) {
+  if (!without_dynamixel) {
     closeDynamixelPort();
   }
 }
 
+bool MiniVDriver::checkDynamixelError(
+  const int dynamixel_comm_result, const uint8_t dynamixel_packet_error)
+{
+  if (dynamixel_comm_result != COMM_SUCCESS || dynamixel_packet_error != 0) {
+    return false;
+  }
+  return true;
+}
+
+bool MiniVDriver::torqueEnableAll(bool enable)
+{
+  torqueEnable(enable, left_dynamixel_id);
+  torqueEnable(enable, right_dynamixl_id);
+}
+
+bool MiniVDriver::torqueEnable(bool enable, uint8_t id)
+{
+  uint8_t dynamixel_error = 0;
+  int dynamixel_result = dynamixel_packet_handler_->write1ByteTxRx(
+    dynamixel_port_handler_.get(),
+    id, ADDR_TORQUE_ENABLE, enable, &dynamixel_error);
+  if (!checkDynamixelError(dynamixel_result, dynamixel_error)) {
+    return false;
+  }
+  return true;
+}
+
 void MiniVDriver::closeDynamixelPort() const
 {
-  dxl_port_handler_->closePort();
+  dynamixel_port_handler_->closePort();
 }
 
 void MiniVDriver::openDynamixelPort() const
 {
-  if (!dxl_port_handler_->openPort()) {
+  if (!dynamixel_port_handler_->openPort()) {
     throw std::runtime_error(
             std::string(__func__) + ": unable to open dynamixel port: " +
-            dxl_port_handler_->getPortName());
+            dynamixel_port_handler_->getPortName());
   }
-  if (!dxl_port_handler_->setBaudRate(baudrate)) {
+  if (!dynamixel_port_handler_->setBaudRate(baudrate)) {
     throw std::runtime_error(
             std::string(__func__) + ": unable to set baudrate" +
-            std::to_string(dxl_port_handler_->getBaudRate()));
+            std::to_string(dynamixel_port_handler_->getBaudRate()));
   }
 }
 }  // namespace miniv_control
