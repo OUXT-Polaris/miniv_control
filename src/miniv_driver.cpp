@@ -38,6 +38,14 @@ MiniVDriver::MiniVDriver(
   openDynamixelPort();
 }
 
+MiniVDriver::MiniVDriver()
+: without_dynamixel(true),
+  dynamixel_port_name(""),
+  baudrate(0),
+  right_dynamixel_id(0),
+  left_dynamixel_id(0)
+{}
+
 MiniVDriver::~MiniVDriver()
 {
   if (!without_dynamixel) {
