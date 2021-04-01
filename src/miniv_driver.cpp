@@ -29,7 +29,7 @@ MiniVDriver::MiniVDriver(
   dynamixel_port_name(dynamixel_port_name),
   baudrate(baudrate),
   left_dynamixel_id(left_dynamixel_id),
-  right_dynamixl_id(right_dynamixl_id)
+  right_dynamixel_id(right_dynamixel_id)
 {
   dynamixel_port_handler_ = std::shared_ptr<dynamixel::PortHandler>(
     dynamixel::PortHandler::getPortHandler(dynamixel_port_name.c_str()));
@@ -54,10 +54,39 @@ bool MiniVDriver::checkDynamixelError(
   return true;
 }
 
-bool MiniVDriver::torqueEnableAll(bool enable)
+boost::optional<double> MiniVDriver::getCurrentAngle(Motor motor)
 {
-  torqueEnable(enable, left_dynamixel_id);
-  torqueEnable(enable, right_dynamixl_id);
+  switch (motor) {
+    case Motor::AZIMUTH_LEFT:
+      return getCurrentAngle(left_dynamixel_id);
+      break;
+    case Motor::AZIMUTH_RIGHT:
+      return getCurrentAngle(right_dynamixel_id);
+    default:
+      break;
+  }
+  return boost::none;
+}
+
+bool MiniVDriver::torqueEnable(Motor motor, bool enable)
+{
+  switch (motor) {
+    case Motor::AZIMUTH_LEFT:
+      return torqueEnable(enable, left_dynamixel_id);
+      break;
+    case Motor::AZIMUTH_RIGHT:
+      return torqueEnable(enable, right_dynamixel_id);
+      break;
+    case Motor::AZIMUTH:
+      if (torqueEnable(enable, left_dynamixel_id) && torqueEnable(enable, right_dynamixel_id)) {
+        return true;
+      }
+      return false;
+      break;
+    default:
+      break;
+  }
+  return false;
 }
 
 bool MiniVDriver::torqueEnable(bool enable, uint8_t id)
@@ -72,9 +101,32 @@ bool MiniVDriver::torqueEnable(bool enable, uint8_t id)
   return true;
 }
 
+boost::optional<double> MiniVDriver::getCurrentAngle(uint8_t id)
+{
+  uint8_t dynamixel_error = 0;
+  uint16_t dynamixel_present_position = 0;
+  int dynamixel_result = dynamixel_packet_handler_->read2ByteTxRx(
+    dynamixel_port_handler_.get(),
+    id, ADDR_PRESENT_POSITION, &dynamixel_present_position, &dynamixel_error);
+  if (!checkDynamixelError(dynamixel_result, dynamixel_error)) {
+    return boost::none;
+  }
+  return dynamixelPositionToRadian(dynamixel_present_position);
+}
+
 void MiniVDriver::closeDynamixelPort() const
 {
   dynamixel_port_handler_->closePort();
+}
+
+double MiniVDriver::dynamixelPositionToRadian(const uint16_t position) const
+{
+  return (position - DXL_HOME_POSITION) * TO_RADIANS;
+}
+
+uint16_t MiniVDriver::radianToDynamixelPosition(const double position) const
+{
+  return position * TO_DXL_POS + DXL_HOME_POSITION;
 }
 
 void MiniVDriver::openDynamixelPort() const

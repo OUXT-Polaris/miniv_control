@@ -16,6 +16,7 @@
 #define MINIV_CONTROL__MINIV_HARDWARE_HPP_
 
 #include <miniv_control/visibility_control.hpp>
+#include <miniv_control/miniv_driver.hpp>
 
 #include <hardware_interface/base_interface.hpp>
 #include <hardware_interface/handle.hpp>
@@ -67,7 +68,7 @@ public:
 private:
   bool communication_timeout();
 
-  // std::shared_ptr<CranePlusDriver> driver_;
+  std::shared_ptr<MiniVDriver> driver_;
   double timeout_seconds_;
 
   std::vector<double> hw_position_commands_;

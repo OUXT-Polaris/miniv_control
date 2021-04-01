@@ -43,6 +43,9 @@ constexpr uint16_t ADDR_PRESENT_SPEED = 128;
 // constexpr uint16_t ADDR_PRESENT_VOLTAGE = 42;
 constexpr uint16_t ADDR_PRESENT_TEMPERATURE = 146;
 
+constexpr uint8_t LEFT_AZIMUTH_ID = 0;
+constexpr uint8_t RIGHT_AZIMUTH_ID = 1;
+
 }  // namespace miniv_control
 
 #endif  // MINIV_CONTROL__CONSTANTS_HPP_

@@ -17,12 +17,25 @@
 
 #include <dynamixel_sdk/dynamixel_sdk.h>
 
+#include <boost/optional.hpp>
+
 #include <string>
 #include <vector>
 #include <memory>
 
 namespace miniv_control
 {
+enum class Motor
+{
+  AZIMUTH_LEFT,
+  AZIMUTH_RIGHT,
+  THRUSTER_LEFT,
+  TURUSTER_RIGHT,
+  AZIMUTH,
+  THRUSTER,
+  ALL
+};
+
 class MiniVDriver
 {
 public:
@@ -36,17 +49,21 @@ public:
   const std::string dynamixel_port_name;
   const int baudrate;
   const uint8_t left_dynamixel_id;
-  const uint8_t right_dynamixl_id;
-  bool torqueEnable(bool enable, uint8_t id);
-  bool torqueEnableAll(bool enable);
+  const uint8_t right_dynamixel_id;
+  bool torqueEnable(Motor motor, bool enable);
+  boost::optional<double> getCurrentAngle(Motor motor);
 
 private:
+  bool torqueEnable(bool enable, uint8_t id);
+  boost::optional<double> getCurrentAngle(uint8_t id);
   bool checkDynamixelError(
     const int dynamixel_comm_result, const uint8_t dynamixel_packet_error);
   void openDynamixelPort() const;
   void closeDynamixelPort() const;
   std::shared_ptr<dynamixel::PortHandler> dynamixel_port_handler_;
   std::shared_ptr<dynamixel::PacketHandler> dynamixel_packet_handler_;
+  double dynamixelPositionToRadian(const uint16_t position) const;
+  uint16_t radianToDynamixelPosition(const double position) const;
 };
 }  // namespace miniv_control
 

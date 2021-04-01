@@ -13,6 +13,8 @@
 // limitations under the License.
 
 #include <miniv_control/miniv_hardware.hpp>
+#include <miniv_control/miniv_driver.hpp>
+#include <miniv_control/constants.hpp>
 
 #include <hardware_interface/types/hardware_interface_type_values.hpp>
 
@@ -38,22 +40,13 @@ return_type MiniVHardware::configure(
 
   // Get parameters from URDF
   // Initialize member variables
-  std::string port_name = info_.hardware_parameters["port_name"];
-  int baudrate = std::stoi(info_.hardware_parameters["baudrate"]);
-  timeout_seconds_ = std::stod(info_.hardware_parameters["timeout_seconds"]);
-
-  std::vector<uint8_t> dxl_id_list;
-  for (auto joint : info_.joints) {
-    if (joint.parameters["dxl_id"] != "") {
-      dxl_id_list.push_back(std::stoi(joint.parameters["dxl_id"]));
-    } else {
-      RCLCPP_ERROR(
-        rclcpp::get_logger("MiniVHardware"),
-        "Joint '%s' does not have 'dxl_id' parameter.",
-        joint.name.c_str());
-      return return_type::ERROR;
-    }
+  if (info_.hardware_parameters["enable_azimuth"] == "true") {
+    std::string port_name = info_.hardware_parameters["port_name"];
+    int baudrate = std::stoi(info_.hardware_parameters["baudrate"]);
+    driver_ = std::make_shared<MiniVDriver>(port_name, baudrate, LEFT_AZIMUTH_ID, RIGHT_AZIMUTH_ID);
   }
+
+  timeout_seconds_ = std::stod(info_.hardware_parameters["timeout_seconds"]);
 
   hw_position_commands_.resize(info_.joints.size(), std::numeric_limits<double>::quiet_NaN());
   hw_position_states_.resize(info_.joints.size(), std::numeric_limits<double>::quiet_NaN());
@@ -63,7 +56,7 @@ return_type MiniVHardware::configure(
   hw_temperature_states_.resize(info_.joints.size(), std::numeric_limits<double>::quiet_NaN());
 
   // Open a crane_plus_driver
-  // driver_ = std::make_shared<CranePlusDriver>(port_name, baudrate, dxl_id_list);
+  //
   /*
   if (!driver_->open_port()) {
     RCLCPP_ERROR(
