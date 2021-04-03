@@ -75,17 +75,28 @@ boost::optional<double> MiniVDriver::getCurrentAngle(const Motor & motor)
   return boost::none;
 }
 
+bool MiniVDriver::setGoalAngle(uint8_t id, const double & goal_angle)
+{
+  bool retval = true;
+  uint8_t dynamixel_error = 0;
+  uint16_t goal_position = radianToDynamixelPosition(goal_angle);
+  return dynamixel_packet_handler_->write2ByteTxRx(
+    dynamixel_port_handler_.get(), id, ADDR_GOAL_POSITION, goal_position, &dynamixel_error);
+}
+
 bool MiniVDriver::setGoalAngle(const Motor & motor, const double & goal_angle)
 {
   switch (motor) {
     case Motor::AZIMUTH_LEFT:
-      return torqueEnable(enable, left_dynamixel_id);
+      return setGoalAngle(left_dynamixel_id, goal_angle);
       break;
     case Motor::AZIMUTH_RIGHT:
-      return torqueEnable(enable, right_dynamixel_id);
+      return setGoalAngle(right_dynamixel_id, goal_angle);
       break;
     case Motor::AZIMUTH:
-      if (torqueEnable(enable, left_dynamixel_id) && torqueEnable(enable, right_dynamixel_id)) {
+      if (setGoalAngle(left_dynamixel_id, goal_angle) &&
+        setGoalAngle(right_dynamixel_id, goal_angle))
+      {
         return true;
       }
       return false;

@@ -56,6 +56,7 @@ public:
   boost::optional<double> getCurrentAngle(const Motor & motor);
 
 private:
+  bool setGoalAngle(uint8_t id, const double & goal_angle);
   bool torqueEnable(bool enable, uint8_t id);
   boost::optional<double> getCurrentAngle(uint8_t id);
   bool checkDynamixelError(
