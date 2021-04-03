@@ -55,21 +55,6 @@ return_type MiniVHardware::configure(
   hw_voltage_states_.resize(info_.joints.size(), std::numeric_limits<double>::quiet_NaN());
   hw_temperature_states_.resize(info_.joints.size(), std::numeric_limits<double>::quiet_NaN());
 
-  // Open a crane_plus_driver
-  //
-  /*
-  if (!driver_->open_port()) {
-    RCLCPP_ERROR(
-      rclcpp::get_logger("MiniVHardware"), driver_->get_last_error_log());
-    return return_type::ERROR;
-  }
-  if (!driver_->torque_enable(false)) {
-    RCLCPP_ERROR(
-      rclcpp::get_logger("MiniVHardware"), driver_->get_last_error_log());
-    return return_type::ERROR;
-  }
-  */
-
   // Verify that the interface required by MiniVHardware is set in the URDF.
   for (const hardware_interface::ComponentInfo & joint : info_.joints) {
     if (joint.command_interfaces.size() != 1) {
@@ -103,28 +88,6 @@ MiniVHardware::export_state_interfaces()
       hardware_interface::StateInterface(
         info_.joints[i].name, hardware_interface::HW_IF_POSITION,
         &hw_position_states_[i])
-    );
-
-    state_interfaces.emplace_back(
-      hardware_interface::StateInterface(
-        info_.joints[i].name, hardware_interface::HW_IF_VELOCITY,
-        &hw_velocity_states_[i])
-    );
-
-    state_interfaces.emplace_back(
-      hardware_interface::StateInterface(
-        info_.joints[i].name, "load",
-        &hw_load_states_[i])
-    );
-    state_interfaces.emplace_back(
-      hardware_interface::StateInterface(
-        info_.joints[i].name, "voltage",
-        &hw_voltage_states_[i])
-    );
-    state_interfaces.emplace_back(
-      hardware_interface::StateInterface(
-        info_.joints[i].name, "temperature",
-        &hw_temperature_states_[i])
     );
   }
 

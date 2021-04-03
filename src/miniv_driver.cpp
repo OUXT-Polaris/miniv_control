@@ -36,6 +36,7 @@ MiniVDriver::MiniVDriver(
   dynamixel_packet_handler_ = std::shared_ptr<dynamixel::PacketHandler>(
     dynamixel::PacketHandler::getPacketHandler(PROTOCOL_VERSION));
   openDynamixelPort();
+  torqueEnable(Motor::ALL, true);
 }
 
 MiniVDriver::MiniVDriver()
@@ -168,17 +169,14 @@ uint16_t MiniVDriver::radianToDynamixelPosition(const double position) const
   return position * TO_DXL_POS + DXL_HOME_POSITION;
 }
 
-void MiniVDriver::openDynamixelPort() const
+bool MiniVDriver::openDynamixelPort() const
 {
   if (!dynamixel_port_handler_->openPort()) {
-    throw std::runtime_error(
-            std::string(__func__) + ": unable to open dynamixel port: " +
-            dynamixel_port_handler_->getPortName());
+    return false;
   }
   if (!dynamixel_port_handler_->setBaudRate(baudrate)) {
-    throw std::runtime_error(
-            std::string(__func__) + ": unable to set baudrate" +
-            std::to_string(dynamixel_port_handler_->getBaudRate()));
+    return false;
   }
+  return true;
 }
 }  // namespace miniv_control

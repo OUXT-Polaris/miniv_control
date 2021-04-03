@@ -61,7 +61,7 @@ private:
   boost::optional<double> getCurrentAngle(uint8_t id);
   bool checkDynamixelError(
     const int dynamixel_comm_result, const uint8_t dynamixel_packet_error);
-  void openDynamixelPort() const;
+  bool openDynamixelPort() const;
   void closeDynamixelPort() const;
   std::shared_ptr<dynamixel::PortHandler> dynamixel_port_handler_;
   std::shared_ptr<dynamixel::PacketHandler> dynamixel_packet_handler_;
