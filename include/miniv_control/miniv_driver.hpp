@@ -51,8 +51,9 @@ public:
   const int baudrate;
   const uint8_t left_dynamixel_id;
   const uint8_t right_dynamixel_id;
-  bool torqueEnable(Motor motor, bool enable);
-  boost::optional<double> getCurrentAngle(Motor motor);
+  bool torqueEnable(const Motor & motor, bool enable);
+  bool setGoalAngle(const Motor & motor, const double & goal_angle);
+  boost::optional<double> getCurrentAngle(const Motor & motor);
 
 private:
   bool torqueEnable(bool enable, uint8_t id);

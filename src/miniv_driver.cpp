@@ -43,8 +43,7 @@ MiniVDriver::MiniVDriver()
   dynamixel_port_name(""),
   baudrate(0),
   right_dynamixel_id(0),
-  left_dynamixel_id(0)
-{}
+  left_dynamixel_id(0) {}
 
 MiniVDriver::~MiniVDriver()
 {
@@ -62,7 +61,7 @@ bool MiniVDriver::checkDynamixelError(
   return true;
 }
 
-boost::optional<double> MiniVDriver::getCurrentAngle(Motor motor)
+boost::optional<double> MiniVDriver::getCurrentAngle(const Motor & motor)
 {
   switch (motor) {
     case Motor::AZIMUTH_LEFT:
@@ -76,7 +75,28 @@ boost::optional<double> MiniVDriver::getCurrentAngle(Motor motor)
   return boost::none;
 }
 
-bool MiniVDriver::torqueEnable(Motor motor, bool enable)
+bool MiniVDriver::setGoalAngle(const Motor & motor, const double & goal_angle)
+{
+  switch (motor) {
+    case Motor::AZIMUTH_LEFT:
+      return torqueEnable(enable, left_dynamixel_id);
+      break;
+    case Motor::AZIMUTH_RIGHT:
+      return torqueEnable(enable, right_dynamixel_id);
+      break;
+    case Motor::AZIMUTH:
+      if (torqueEnable(enable, left_dynamixel_id) && torqueEnable(enable, right_dynamixel_id)) {
+        return true;
+      }
+      return false;
+      break;
+    default:
+      break;
+  }
+  return false;
+}
+
+bool MiniVDriver::torqueEnable(const Motor & motor, bool enable)
 {
   switch (motor) {
     case Motor::AZIMUTH_LEFT:
