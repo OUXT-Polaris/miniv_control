@@ -44,7 +44,7 @@ public:
     const int & baudrate,
     const uint8_t & left_dynamixel_id,
     const uint8_t & right_dynamixel_id);
-  explicit MiniVDriver();
+  MiniVDriver();
   ~MiniVDriver();
   const bool without_dynamixel;
   const std::string dynamixel_port_name;
