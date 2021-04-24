@@ -47,6 +47,7 @@ MiniVDriver::MiniVDriver(
   boost::asio::io_service io_service;
   tcp_client_ = std::make_unique<tcp_sender::TcpClient>(
     io_service, rclcpp::get_logger("MiniVHardware"));
+  tcp_client_->connect(thruster_ip_address, thruster_port);
 }
 
 MiniVDriver::MiniVDriver(
@@ -63,6 +64,7 @@ MiniVDriver::MiniVDriver(
   boost::asio::io_service io_service;
   tcp_client_ = std::make_unique<tcp_sender::TcpClient>(
     io_service, rclcpp::get_logger("MiniVHardware"));
+  tcp_client_->connect(thruster_ip_address, thruster_port);
 }
 
 MiniVDriver::~MiniVDriver()
@@ -100,6 +102,7 @@ bool MiniVDriver::setThrust(const Motor & motor, double thrust)
   json["left_thrust"] = left_thrust_;
   json["right_thrust"] = right_thrust_;
   std::string message = json.dump();
+  return tcp_client_->send(message);
 }
 
 boost::optional<double> MiniVDriver::getCurrentAngle(const Motor & motor)
