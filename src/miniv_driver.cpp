@@ -15,6 +15,8 @@
 #include <miniv_control/constants.hpp>
 #include <miniv_control/miniv_driver.hpp>
 
+#include <rclcpp/rclcpp.hpp>
+
 #include <string>
 #include <memory>
 
@@ -37,6 +39,11 @@ MiniVDriver::MiniVDriver(
     dynamixel::PacketHandler::getPacketHandler(PROTOCOL_VERSION));
   openDynamixelPort();
   torqueEnable(Motor::ALL, true);
+  boost::asio::io_service io_service;
+  /*
+  tcp_client_ = std::make_unique<tcp_sender::TcpClient>(
+    io_service, rclcpp::get_logger("MiniVHardware"));
+  */
 }
 
 MiniVDriver::MiniVDriver()
@@ -44,7 +51,12 @@ MiniVDriver::MiniVDriver()
   dynamixel_port_name(""),
   baudrate(0),
   right_dynamixel_id(0),
-  left_dynamixel_id(0) {}
+  left_dynamixel_id(0)
+{
+  boost::asio::io_service io_service;
+  tcp_client_ = std::make_unique<tcp_sender::TcpClient>(
+    io_service, rclcpp::get_logger("MiniVHardware"));
+}
 
 MiniVDriver::~MiniVDriver()
 {
