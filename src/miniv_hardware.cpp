@@ -37,13 +37,16 @@ return_type MiniVHardware::configure(
   if (configure_default(info) != return_type::OK) {
     return return_type::ERROR;
   }
-
+  std::string thruster_ip_address = info_.hardware_parameters["thruster_ip_address"];
+  int thruster_port = std::stoi(info_.hardware_parameters["port"]);
   // Get parameters from URDF
   // Initialize member variables
   if (info_.hardware_parameters["enable_azimuth"] == "true") {
     std::string port_name = info_.hardware_parameters["port_name"];
     int baudrate = std::stoi(info_.hardware_parameters["baudrate"]);
-    driver_ = std::make_shared<MiniVDriver>(port_name, baudrate, LEFT_AZIMUTH_ID, RIGHT_AZIMUTH_ID);
+    driver_ = std::make_shared<MiniVDriver>(
+      thruster_ip_address, thruster_port, port_name, baudrate,
+      LEFT_AZIMUTH_ID, RIGHT_AZIMUTH_ID);
   }
 
   timeout_seconds_ = std::stod(info_.hardware_parameters["timeout_seconds"]);

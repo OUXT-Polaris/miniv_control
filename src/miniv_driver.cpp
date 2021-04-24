@@ -24,11 +24,15 @@
 namespace miniv_control
 {
 MiniVDriver::MiniVDriver(
+  const std::string & thruster_ip_address,
+  const int & thruster_port,
   const std::string & dynamixel_port_name,
   const int & baudrate,
   const uint8_t & left_dynamixel_id,
   const uint8_t & right_dynamixel_id)
-: without_dynamixel(false),
+: thruster_ip_address(thruster_ip_address),
+  thruster_port(thruster_port),
+  without_dynamixel(false),
   dynamixel_port_name(dynamixel_port_name),
   baudrate(baudrate),
   left_dynamixel_id(left_dynamixel_id),
@@ -45,8 +49,12 @@ MiniVDriver::MiniVDriver(
     io_service, rclcpp::get_logger("MiniVHardware"));
 }
 
-MiniVDriver::MiniVDriver()
-: without_dynamixel(true),
+MiniVDriver::MiniVDriver(
+  const std::string & thruster_ip_address,
+  const int & thruster_port)
+: thruster_ip_address(thruster_ip_address),
+  thruster_port(thruster_port),
+  without_dynamixel(true),
   dynamixel_port_name(""),
   baudrate(0),
   left_dynamixel_id(0),
@@ -72,8 +80,9 @@ bool MiniVDriver::checkDynamixelError(
   }
   return true;
 }
-void MiniVDriver::setThrust(const Motor & motor, double thrust)
+bool MiniVDriver::setThrust(const Motor & motor, double thrust)
 {
+  nlohmann::json json;
   switch (motor) {
     case Motor::THRUSTER:
       left_thrust_ = thrust;
@@ -88,6 +97,9 @@ void MiniVDriver::setThrust(const Motor & motor, double thrust)
     default:
       break;
   }
+  json["left_thrust"] = left_thrust_;
+  json["right_thrust"] = right_thrust_;
+  std::string message = json.dump();
 }
 
 boost::optional<double> MiniVDriver::getCurrentAngle(const Motor & motor)

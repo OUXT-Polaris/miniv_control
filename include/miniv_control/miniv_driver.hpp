@@ -41,12 +41,19 @@ class MiniVDriver
 {
 public:
   explicit MiniVDriver(
+    const std::string & thruster_ip_address,
+    const int & thruster_port,
     const std::string & dynamixel_port_name,
     const int & baudrate,
     const uint8_t & left_dynamixel_id,
     const uint8_t & right_dynamixel_id);
-  MiniVDriver();
+  MiniVDriver(
+    const std::string & thruster_ip_address,
+    const int & thruster_port);
   ~MiniVDriver();
+
+  const std::string thruster_ip_address;
+  const int thruster_port;
   const bool without_dynamixel;
   const std::string dynamixel_port_name;
   const int baudrate;
@@ -55,7 +62,7 @@ public:
   bool torqueEnable(const Motor & motor, bool enable);
   bool setGoalAngle(const Motor & motor, const double & goal_angle);
   boost::optional<double> getCurrentAngle(const Motor & motor);
-  void setThrust(const Motor & motor, double thrust);
+  bool setThrust(const Motor & motor, double thrust);
 
 private:
   double left_thrust_;
