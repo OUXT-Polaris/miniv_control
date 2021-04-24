@@ -55,8 +55,11 @@ public:
   bool torqueEnable(const Motor & motor, bool enable);
   bool setGoalAngle(const Motor & motor, const double & goal_angle);
   boost::optional<double> getCurrentAngle(const Motor & motor);
+  void setThrust(const Motor & motor, double thrust);
 
 private:
+  double left_thrust_;
+  double right_thrust_;
   std::unique_ptr<tcp_sender::TcpClient> tcp_client_;
   bool setGoalAngle(uint8_t id, const double & goal_angle);
   bool torqueEnable(bool enable, uint8_t id);

@@ -16,6 +16,7 @@
 #include <miniv_control/miniv_driver.hpp>
 
 #include <rclcpp/rclcpp.hpp>
+#include <nlohmann/json.hpp>
 
 #include <string>
 #include <memory>
@@ -40,18 +41,16 @@ MiniVDriver::MiniVDriver(
   openDynamixelPort();
   torqueEnable(Motor::ALL, true);
   boost::asio::io_service io_service;
-  /*
   tcp_client_ = std::make_unique<tcp_sender::TcpClient>(
     io_service, rclcpp::get_logger("MiniVHardware"));
-  */
 }
 
 MiniVDriver::MiniVDriver()
 : without_dynamixel(true),
   dynamixel_port_name(""),
   baudrate(0),
-  right_dynamixel_id(0),
-  left_dynamixel_id(0)
+  left_dynamixel_id(0),
+  right_dynamixel_id(0)
 {
   boost::asio::io_service io_service;
   tcp_client_ = std::make_unique<tcp_sender::TcpClient>(
@@ -73,6 +72,23 @@ bool MiniVDriver::checkDynamixelError(
   }
   return true;
 }
+void MiniVDriver::setThrust(const Motor & motor, double thrust)
+{
+  switch (motor) {
+    case Motor::THRUSTER:
+      left_thrust_ = thrust;
+      right_thrust_ = thrust;
+      break;
+    case Motor::THRUSTER_LEFT:
+      left_thrust_ = thrust;
+      break;
+    case Motor::TURUSTER_RIGHT:
+      right_thrust_ = thrust;
+      break;
+    default:
+      break;
+  }
+}
 
 boost::optional<double> MiniVDriver::getCurrentAngle(const Motor & motor)
 {
@@ -90,7 +106,6 @@ boost::optional<double> MiniVDriver::getCurrentAngle(const Motor & motor)
 
 bool MiniVDriver::setGoalAngle(uint8_t id, const double & goal_angle)
 {
-  bool retval = true;
   uint8_t dynamixel_error = 0;
   uint16_t goal_position = radianToDynamixelPosition(goal_angle);
   return dynamixel_packet_handler_->write2ByteTxRx(
