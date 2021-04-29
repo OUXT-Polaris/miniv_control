@@ -23,7 +23,7 @@ find_package(hardware_interface REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(xacro REQUIRED)
-find_package(ros2_controllers REQUIRED)
+find_package(ros2_control REQUIRED)
 
 set(LIBRARY_NAME "miniv_control")
 add_library(
@@ -44,6 +44,7 @@ ament_target_dependencies(
   pluginlib
   rclcpp
   tcp_sender
+  ros2_control
 )
 
 pluginlib_export_plugin_description_file(hardware_interface miniv_hardware.xml)
@@ -69,6 +70,7 @@ ament_export_dependencies(
   pluginlib
   rclcpp
   tcp_sender
+  ros2_control
 )
 
 install(DIRECTORY config
