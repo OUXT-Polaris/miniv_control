@@ -15,17 +15,24 @@
 #include <miniv_control/constants.hpp>
 #include <miniv_control/miniv_driver.hpp>
 
+#include <rclcpp/rclcpp.hpp>
+#include <nlohmann/json.hpp>
+
 #include <string>
 #include <memory>
 
 namespace miniv_control
 {
 MiniVDriver::MiniVDriver(
+  const std::string & thruster_ip_address,
+  const int & thruster_port,
   const std::string & dynamixel_port_name,
   const int & baudrate,
   const uint8_t & left_dynamixel_id,
   const uint8_t & right_dynamixel_id)
-: without_dynamixel(false),
+: thruster_ip_address(thruster_ip_address),
+  thruster_port(thruster_port),
+  without_dynamixel(false),
   dynamixel_port_name(dynamixel_port_name),
   baudrate(baudrate),
   left_dynamixel_id(left_dynamixel_id),
@@ -36,14 +43,29 @@ MiniVDriver::MiniVDriver(
   dynamixel_packet_handler_ = std::shared_ptr<dynamixel::PacketHandler>(
     dynamixel::PacketHandler::getPacketHandler(PROTOCOL_VERSION));
   openDynamixelPort();
+  torqueEnable(Motor::ALL, true);
+  boost::asio::io_service io_service;
+  tcp_client_ = std::make_unique<tcp_sender::TcpClient>(
+    io_service, rclcpp::get_logger("MiniVHardware"));
+  tcp_client_->connect(thruster_ip_address, thruster_port);
 }
 
-MiniVDriver::MiniVDriver()
-: without_dynamixel(true),
+MiniVDriver::MiniVDriver(
+  const std::string & thruster_ip_address,
+  const int & thruster_port)
+: thruster_ip_address(thruster_ip_address),
+  thruster_port(thruster_port),
+  without_dynamixel(true),
   dynamixel_port_name(""),
   baudrate(0),
-  right_dynamixel_id(0),
-  left_dynamixel_id(0) {}
+  left_dynamixel_id(0),
+  right_dynamixel_id(0)
+{
+  boost::asio::io_service io_service;
+  tcp_client_ = std::make_unique<tcp_sender::TcpClient>(
+    io_service, rclcpp::get_logger("MiniVHardware"));
+  tcp_client_->connect(thruster_ip_address, thruster_port);
+}
 
 MiniVDriver::~MiniVDriver()
 {
@@ -59,6 +81,28 @@ bool MiniVDriver::checkDynamixelError(
     return false;
   }
   return true;
+}
+bool MiniVDriver::setThrust(const Motor & motor, double thrust)
+{
+  nlohmann::json json;
+  switch (motor) {
+    case Motor::THRUSTER:
+      left_thrust_ = thrust;
+      right_thrust_ = thrust;
+      break;
+    case Motor::THRUSTER_LEFT:
+      left_thrust_ = thrust;
+      break;
+    case Motor::TURUSTER_RIGHT:
+      right_thrust_ = thrust;
+      break;
+    default:
+      break;
+  }
+  json["left_thrust"] = left_thrust_;
+  json["right_thrust"] = right_thrust_;
+  std::string message = json.dump();
+  return tcp_client_->send(message);
 }
 
 boost::optional<double> MiniVDriver::getCurrentAngle(const Motor & motor)
@@ -77,7 +121,6 @@ boost::optional<double> MiniVDriver::getCurrentAngle(const Motor & motor)
 
 bool MiniVDriver::setGoalAngle(uint8_t id, const double & goal_angle)
 {
-  bool retval = true;
   uint8_t dynamixel_error = 0;
   uint16_t goal_position = radianToDynamixelPosition(goal_angle);
   return dynamixel_packet_handler_->write2ByteTxRx(
@@ -168,17 +211,14 @@ uint16_t MiniVDriver::radianToDynamixelPosition(const double position) const
   return position * TO_DXL_POS + DXL_HOME_POSITION;
 }
 
-void MiniVDriver::openDynamixelPort() const
+bool MiniVDriver::openDynamixelPort() const
 {
   if (!dynamixel_port_handler_->openPort()) {
-    throw std::runtime_error(
-            std::string(__func__) + ": unable to open dynamixel port: " +
-            dynamixel_port_handler_->getPortName());
+    return false;
   }
   if (!dynamixel_port_handler_->setBaudRate(baudrate)) {
-    throw std::runtime_error(
-            std::string(__func__) + ": unable to set baudrate" +
-            std::to_string(dynamixel_port_handler_->getBaudRate()));
+    return false;
   }
+  return true;
 }
 }  // namespace miniv_control

@@ -16,6 +16,7 @@
 #define MINIV_CONTROL__MINIV_DRIVER_HPP_
 
 #include <dynamixel_sdk/dynamixel_sdk.h>
+#include <tcp_sender/tcp_client.hpp>
 
 #include <boost/optional.hpp>
 
@@ -40,12 +41,19 @@ class MiniVDriver
 {
 public:
   explicit MiniVDriver(
+    const std::string & thruster_ip_address,
+    const int & thruster_port,
     const std::string & dynamixel_port_name,
     const int & baudrate,
     const uint8_t & left_dynamixel_id,
     const uint8_t & right_dynamixel_id);
-  MiniVDriver();
+  MiniVDriver(
+    const std::string & thruster_ip_address,
+    const int & thruster_port);
   ~MiniVDriver();
+
+  const std::string thruster_ip_address;
+  const int thruster_port;
   const bool without_dynamixel;
   const std::string dynamixel_port_name;
   const int baudrate;
@@ -54,14 +62,18 @@ public:
   bool torqueEnable(const Motor & motor, bool enable);
   bool setGoalAngle(const Motor & motor, const double & goal_angle);
   boost::optional<double> getCurrentAngle(const Motor & motor);
+  bool setThrust(const Motor & motor, double thrust);
 
 private:
+  double left_thrust_;
+  double right_thrust_;
+  std::unique_ptr<tcp_sender::TcpClient> tcp_client_;
   bool setGoalAngle(uint8_t id, const double & goal_angle);
   bool torqueEnable(bool enable, uint8_t id);
   boost::optional<double> getCurrentAngle(uint8_t id);
   bool checkDynamixelError(
     const int dynamixel_comm_result, const uint8_t dynamixel_packet_error);
-  void openDynamixelPort() const;
+  bool openDynamixelPort() const;
   void closeDynamixelPort() const;
   std::shared_ptr<dynamixel::PortHandler> dynamixel_port_handler_;
   std::shared_ptr<dynamixel::PacketHandler> dynamixel_packet_handler_;

@@ -17,14 +17,15 @@ endif()
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
+find_package(tcp_sender REQUIRED)
 find_package(dynamixel_sdk REQUIRED)
 find_package(hardware_interface REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(xacro REQUIRED)
-find_package(ros2_controllers REQUIRED)
+find_package(ros2_control REQUIRED)
 
-set(LIBRARY_NAME "miniv_hardware")
+set(LIBRARY_NAME "miniv_control")
 add_library(
   ${LIBRARY_NAME}
   SHARED
@@ -42,6 +43,8 @@ ament_target_dependencies(
   hardware_interface
   pluginlib
   rclcpp
+  tcp_sender
+  ros2_control
 )
 
 pluginlib_export_plugin_description_file(hardware_interface miniv_hardware.xml)
@@ -66,6 +69,12 @@ ament_export_dependencies(
   hardware_interface
   pluginlib
   rclcpp
+  tcp_sender
+  ros2_control
+)
+
+install(DIRECTORY config
+  DESTINATION share/${PROJECT_NAME}
 )
 
 ament_package()

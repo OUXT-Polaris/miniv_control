@@ -37,13 +37,16 @@ return_type MiniVHardware::configure(
   if (configure_default(info) != return_type::OK) {
     return return_type::ERROR;
   }
-
+  std::string thruster_ip_address = info_.hardware_parameters["thruster_ip_address"];
+  int thruster_port = std::stoi(info_.hardware_parameters["port"]);
   // Get parameters from URDF
   // Initialize member variables
   if (info_.hardware_parameters["enable_azimuth"] == "true") {
     std::string port_name = info_.hardware_parameters["port_name"];
     int baudrate = std::stoi(info_.hardware_parameters["baudrate"]);
-    driver_ = std::make_shared<MiniVDriver>(port_name, baudrate, LEFT_AZIMUTH_ID, RIGHT_AZIMUTH_ID);
+    driver_ = std::make_shared<MiniVDriver>(
+      thruster_ip_address, thruster_port, port_name, baudrate,
+      LEFT_AZIMUTH_ID, RIGHT_AZIMUTH_ID);
   }
 
   timeout_seconds_ = std::stod(info_.hardware_parameters["timeout_seconds"]);
@@ -54,21 +57,6 @@ return_type MiniVHardware::configure(
   hw_load_states_.resize(info_.joints.size(), std::numeric_limits<double>::quiet_NaN());
   hw_voltage_states_.resize(info_.joints.size(), std::numeric_limits<double>::quiet_NaN());
   hw_temperature_states_.resize(info_.joints.size(), std::numeric_limits<double>::quiet_NaN());
-
-  // Open a crane_plus_driver
-  //
-  /*
-  if (!driver_->open_port()) {
-    RCLCPP_ERROR(
-      rclcpp::get_logger("MiniVHardware"), driver_->get_last_error_log());
-    return return_type::ERROR;
-  }
-  if (!driver_->torque_enable(false)) {
-    RCLCPP_ERROR(
-      rclcpp::get_logger("MiniVHardware"), driver_->get_last_error_log());
-    return return_type::ERROR;
-  }
-  */
 
   // Verify that the interface required by MiniVHardware is set in the URDF.
   for (const hardware_interface::ComponentInfo & joint : info_.joints) {
@@ -103,28 +91,6 @@ MiniVHardware::export_state_interfaces()
       hardware_interface::StateInterface(
         info_.joints[i].name, hardware_interface::HW_IF_POSITION,
         &hw_position_states_[i])
-    );
-
-    state_interfaces.emplace_back(
-      hardware_interface::StateInterface(
-        info_.joints[i].name, hardware_interface::HW_IF_VELOCITY,
-        &hw_velocity_states_[i])
-    );
-
-    state_interfaces.emplace_back(
-      hardware_interface::StateInterface(
-        info_.joints[i].name, "load",
-        &hw_load_states_[i])
-    );
-    state_interfaces.emplace_back(
-      hardware_interface::StateInterface(
-        info_.joints[i].name, "voltage",
-        &hw_voltage_states_[i])
-    );
-    state_interfaces.emplace_back(
-      hardware_interface::StateInterface(
-        info_.joints[i].name, "temperature",
-        &hw_temperature_states_[i])
     );
   }
 
@@ -262,3 +228,7 @@ bool MiniVHardware::communication_timeout()
   }
 }
 }  // namespace miniv_control
+
+#include "pluginlib/class_list_macros.hpp"
+
+PLUGINLIB_EXPORT_CLASS(miniv_control::MiniVHardware, hardware_interface::SystemInterface)
