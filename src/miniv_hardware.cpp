@@ -228,3 +228,7 @@ bool MiniVHardware::communication_timeout()
   }
 }
 }  // namespace miniv_control
+
+#include "pluginlib/class_list_macros.hpp"
+
+PLUGINLIB_EXPORT_CLASS(miniv_control::MiniVHardware, hardware_interface::SystemInterface)

@@ -25,7 +25,7 @@ find_package(rclcpp REQUIRED)
 find_package(xacro REQUIRED)
 find_package(ros2_controllers REQUIRED)
 
-set(LIBRARY_NAME "miniv_hardware")
+set(LIBRARY_NAME "miniv_control")
 add_library(
   ${LIBRARY_NAME}
   SHARED
@@ -69,6 +69,10 @@ ament_export_dependencies(
   pluginlib
   rclcpp
   tcp_sender
+)
+
+install(DIRECTORY config
+  DESTINATION share/${PROJECT_NAME}
 )
 
 ament_package()
