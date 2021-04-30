@@ -48,6 +48,10 @@ return_type MiniVHardware::configure(
       thruster_ip_address, thruster_port, port_name, baudrate,
       LEFT_AZIMUTH_ID, RIGHT_AZIMUTH_ID);
   }
+  else {
+    driver_ = std::make_shared<MiniVDriver>(
+      thruster_ip_address, thruster_port);
+  }
 
   timeout_seconds_ = std::stod(info_.hardware_parameters["timeout_seconds"]);
 
