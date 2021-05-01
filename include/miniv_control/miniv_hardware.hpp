@@ -67,7 +67,6 @@ public:
   return_type write() override;
 
 private:
-
   std::shared_ptr<MiniVDriver> driver_;
 };
 }  // namespace miniv_control
