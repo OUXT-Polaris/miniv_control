@@ -119,6 +119,18 @@ boost::optional<double> MiniVDriver::getCurrentAngle(const Motor & motor)
   return boost::none;
 }
 
+std::unordered_map<Motor, double> MiniVDriver::getCurrentAngle()
+{
+  std::unordered_map<Motor, double> ret;
+  if(const auto angle = getCurrentAngle(Motor::AZIMUTH_LEFT)) {
+    ret[Motor::AZIMUTH_LEFT] = angle.get();
+  }
+  if(const auto angle = getCurrentAngle(Motor::AZIMUTH_RIGHT)) {
+    ret[Motor::AZIMUTH_RIGHT] = angle.get();
+  }
+  return ret;
+}
+
 bool MiniVDriver::setGoalAngle(uint8_t id, const double & goal_angle)
 {
   uint8_t dynamixel_error = 0;

@@ -23,6 +23,7 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <unordered_map>
 
 namespace miniv_control
 {
@@ -62,6 +63,7 @@ public:
   bool torqueEnable(const Motor & motor, bool enable);
   bool setGoalAngle(const Motor & motor, const double & goal_angle);
   boost::optional<double> getCurrentAngle(const Motor & motor);
+  std::unordered_map<Motor, double> getCurrentAngle();
   bool setThrust(const Motor & motor, double thrust);
 
 private:

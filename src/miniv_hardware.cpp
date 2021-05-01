@@ -27,8 +27,6 @@ namespace miniv_control
 {
 MiniVHardware::~MiniVHardware()
 {
-  // driver_->torque_enable(false);
-  // driver_->close_port();
 }
 
 return_type MiniVHardware::configure(
@@ -42,15 +40,21 @@ return_type MiniVHardware::configure(
   // Get parameters from URDF
   // Initialize member variables
   if (info_.hardware_parameters["enable_azimuth"] == "true") {
+    RCLCPP_INFO(rclcpp::get_logger("MiniVHardware"), "initializing with azimuth control");
     std::string port_name = info_.hardware_parameters["port_name"];
     int baudrate = std::stoi(info_.hardware_parameters["baudrate"]);
     driver_ = std::make_shared<MiniVDriver>(
       thruster_ip_address, thruster_port, port_name, baudrate,
       LEFT_AZIMUTH_ID, RIGHT_AZIMUTH_ID);
-  }
-  else {
-    driver_ = std::make_shared<MiniVDriver>(
-      thruster_ip_address, thruster_port);
+  } else {
+    RCLCPP_INFO(rclcpp::get_logger("MiniVHardware"), "initializing without azimuth control");
+    try {
+      driver_ = std::make_shared<MiniVDriver>(
+        thruster_ip_address, thruster_port);
+    } catch (const std::runtime_error & e) {
+      RCLCPP_ERROR(rclcpp::get_logger("MiniVHardware"), e.what());
+      return return_type::ERROR;
+    }
   }
 
   timeout_seconds_ = std::stod(info_.hardware_parameters["timeout_seconds"]);
@@ -118,14 +122,12 @@ MiniVHardware::export_command_interfaces()
 
 return_type MiniVHardware::start()
 {
-  /*
-  if (!driver_->torque_enable(false)) {
+  if (!driver_->without_dynamixel && !driver_->torqueEnable(miniv_control::Motor::AZIMUTH, true)) {
     RCLCPP_ERROR(
       rclcpp::get_logger("MiniVHardware"),
-      driver_->get_last_error_log());
+      "failed to enable torque");
     return return_type::ERROR;
   }
-  */
   // Set current timestamp to disable the communication timeout.
   prev_comm_timestamp_ = rclcpp::Clock().now();
 
@@ -141,7 +143,12 @@ return_type MiniVHardware::start()
 
 return_type MiniVHardware::stop()
 {
-  // driver_->torque_enable(false);
+  if (!driver_->without_dynamixel && !driver_->torqueEnable(miniv_control::Motor::AZIMUTH, false)) {
+    RCLCPP_ERROR(
+      rclcpp::get_logger("MiniVHardware"),
+      "failed to disable torque");
+    return return_type::ERROR;
+  }
   status_ = hardware_interface::status::STOPPED;
   return return_type::OK;
 }
@@ -153,8 +160,6 @@ return_type MiniVHardware::read()
       rclcpp::get_logger("MiniVHardware"), "Communication timeout!");
     return return_type::ERROR;
   }
-
-  std::vector<double> joint_positions;
   /*
   if (!driver_->read_present_joint_positions(&joint_positions)) {
     RCLCPP_ERROR(
