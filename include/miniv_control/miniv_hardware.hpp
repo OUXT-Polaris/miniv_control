@@ -24,6 +24,7 @@
 #include <hardware_interface/system_interface.hpp>
 #include <hardware_interface/types/hardware_interface_return_values.hpp>
 #include <hardware_interface/types/hardware_interface_status_values.hpp>
+
 #include <rclcpp/macros.hpp>
 #include <rclcpp/rclcpp.hpp>
 
@@ -66,19 +67,7 @@ public:
   return_type write() override;
 
 private:
-  bool communication_timeout();
-
   std::shared_ptr<MiniVDriver> driver_;
-  double timeout_seconds_;
-
-  std::vector<double> hw_position_commands_;
-  std::vector<double> hw_position_states_;
-  std::vector<double> hw_velocity_states_;
-  std::vector<double> hw_load_states_;
-  std::vector<double> hw_voltage_states_;
-  std::vector<double> hw_temperature_states_;
-
-  rclcpp::Time prev_comm_timestamp_;
 };
 }  // namespace miniv_control
 
