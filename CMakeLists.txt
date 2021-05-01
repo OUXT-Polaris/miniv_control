@@ -18,7 +18,6 @@ endif()
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(tcp_sender REQUIRED)
-find_package(dynamixel_sdk REQUIRED)
 find_package(hardware_interface REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(rclcpp REQUIRED)
@@ -39,7 +38,6 @@ target_include_directories(
 )
 ament_target_dependencies(
   ${LIBRARY_NAME}
-  dynamixel_sdk
   hardware_interface
   pluginlib
   rclcpp
@@ -65,7 +63,6 @@ ament_export_libraries(
   ${LIBRARY_NAME}
 )
 ament_export_dependencies(
-  dynamixel_sdk
   hardware_interface
   pluginlib
   rclcpp

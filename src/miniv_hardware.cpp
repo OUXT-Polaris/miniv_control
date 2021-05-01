@@ -37,55 +37,13 @@ return_type MiniVHardware::configure(
   }
   std::string thruster_ip_address = info_.hardware_parameters["thruster_ip_address"];
   int thruster_port = std::stoi(info_.hardware_parameters["port"]);
-  // Get parameters from URDF
-  // Initialize member variables
-  if (info_.hardware_parameters["enable_azimuth"] == "true") {
-    RCLCPP_INFO(rclcpp::get_logger("MiniVHardware"), "initializing with azimuth control");
-    std::string port_name = info_.hardware_parameters["port_name"];
-    int baudrate = std::stoi(info_.hardware_parameters["baudrate"]);
+  try {
     driver_ = std::make_shared<MiniVDriver>(
-      thruster_ip_address, thruster_port, port_name, baudrate,
-      LEFT_AZIMUTH_ID, RIGHT_AZIMUTH_ID);
-  } else {
-    RCLCPP_INFO(rclcpp::get_logger("MiniVHardware"), "initializing without azimuth control");
-    try {
-      driver_ = std::make_shared<MiniVDriver>(
-        thruster_ip_address, thruster_port);
-    } catch (const std::runtime_error & e) {
-      RCLCPP_ERROR(rclcpp::get_logger("MiniVHardware"), e.what());
-      return return_type::ERROR;
-    }
+      thruster_ip_address, thruster_port);
+  } catch (const std::runtime_error & e) {
+    RCLCPP_ERROR(rclcpp::get_logger("MiniVHardware"), e.what());
+    return return_type::ERROR;
   }
-
-  timeout_seconds_ = std::stod(info_.hardware_parameters["timeout_seconds"]);
-
-  hw_position_commands_.resize(info_.joints.size(), std::numeric_limits<double>::quiet_NaN());
-  hw_position_states_.resize(info_.joints.size(), std::numeric_limits<double>::quiet_NaN());
-  hw_velocity_states_.resize(info_.joints.size(), std::numeric_limits<double>::quiet_NaN());
-  hw_load_states_.resize(info_.joints.size(), std::numeric_limits<double>::quiet_NaN());
-  hw_voltage_states_.resize(info_.joints.size(), std::numeric_limits<double>::quiet_NaN());
-  hw_temperature_states_.resize(info_.joints.size(), std::numeric_limits<double>::quiet_NaN());
-
-  // Verify that the interface required by MiniVHardware is set in the URDF.
-  for (const hardware_interface::ComponentInfo & joint : info_.joints) {
-    if (joint.command_interfaces.size() != 1) {
-      RCLCPP_ERROR(
-        rclcpp::get_logger("MiniVHardware"),
-        "Joint '%s' has %d command interfaces found. 1 expected.",
-        joint.name.c_str(), joint.command_interfaces.size());
-      return return_type::ERROR;
-    }
-
-    if (joint.command_interfaces[0].name != hardware_interface::HW_IF_POSITION) {
-      RCLCPP_ERROR(
-        rclcpp::get_logger("MiniVHardware"),
-        "Joint '%s' have %s command interfaces found. '%s' expected.",
-        joint.name.c_str(), joint.command_interfaces[0].name.c_str(),
-        hardware_interface::HW_IF_POSITION);
-      return return_type::ERROR;
-    }
-  }
-
   status_ = hardware_interface::status::CONFIGURED;
   return return_type::OK;
 }
@@ -93,148 +51,37 @@ return_type MiniVHardware::configure(
 std::vector<hardware_interface::StateInterface>
 MiniVHardware::export_state_interfaces()
 {
-  std::vector<hardware_interface::StateInterface> state_interfaces;
-  for (uint i = 0; i < info_.joints.size(); i++) {
-    state_interfaces.emplace_back(
-      hardware_interface::StateInterface(
-        info_.joints[i].name, hardware_interface::HW_IF_POSITION,
-        &hw_position_states_[i])
-    );
-  }
-
+  std::vector<hardware_interface::StateInterface> state_interfaces = {};
   return state_interfaces;
 }
 
 std::vector<hardware_interface::CommandInterface>
 MiniVHardware::export_command_interfaces()
 {
-  std::vector<hardware_interface::CommandInterface> command_interfaces;
-  for (uint i = 0; i < info_.joints.size(); i++) {
-    command_interfaces.emplace_back(
-      hardware_interface::CommandInterface(
-        info_.joints[i].name, hardware_interface::HW_IF_POSITION,
-        &hw_position_commands_[i])
-    );
-  }
-
+  std::vector<hardware_interface::CommandInterface> command_interfaces = {};
   return command_interfaces;
 }
 
 return_type MiniVHardware::start()
 {
-  if (!driver_->without_dynamixel && !driver_->torqueEnable(miniv_control::Motor::AZIMUTH, true)) {
-    RCLCPP_ERROR(
-      rclcpp::get_logger("MiniVHardware"),
-      "failed to enable torque");
-    return return_type::ERROR;
-  }
-  // Set current timestamp to disable the communication timeout.
-  prev_comm_timestamp_ = rclcpp::Clock().now();
-
-  // Set current joint positions to hw_position_commands.
-  read();
-  for (uint i = 0; i < hw_position_commands_.size(); i++) {
-    hw_position_commands_[i] = hw_position_states_[i];
-  }
-
   status_ = hardware_interface::status::STARTED;
   return return_type::OK;
 }
 
 return_type MiniVHardware::stop()
 {
-  if (!driver_->without_dynamixel && !driver_->torqueEnable(miniv_control::Motor::AZIMUTH, false)) {
-    RCLCPP_ERROR(
-      rclcpp::get_logger("MiniVHardware"),
-      "failed to disable torque");
-    return return_type::ERROR;
-  }
   status_ = hardware_interface::status::STOPPED;
   return return_type::OK;
 }
 
 return_type MiniVHardware::read()
 {
-  if (communication_timeout()) {
-    RCLCPP_ERROR(
-      rclcpp::get_logger("MiniVHardware"), "Communication timeout!");
-    return return_type::ERROR;
-  }
-  /*
-  if (!driver_->read_present_joint_positions(&joint_positions)) {
-    RCLCPP_ERROR(
-      rclcpp::get_logger("MiniVHardware"),
-      driver_->get_last_error_log());
-    return return_type::ERROR;
-  } else {
-    for (uint i = 0; i < hw_position_states_.size(); ++i) {
-      hw_position_states_[i] = joint_positions[i];
-    }
-  }
-  */
-
-  // Disable read joint speeds, loads, voltages and temperatures
-  // to avoid a decrease of the communication rate.
-
-  // std::vector<double> joint_speeds;
-  // if (driver_->read_present_joint_speeds(&joint_speeds)) {
-  //   for (uint i = 0; i < hw_velocity_states_.size(); ++i) {
-  //     hw_velocity_states_[i] = joint_speeds[i];
-  //   }
-  // }
-
-  // std::vector<double> joint_loads;
-  // if (driver_->read_present_joint_loads(&joint_loads)) {
-  //   for (uint i = 0; i < hw_load_states_.size(); ++i) {
-  //     hw_load_states_[i] = joint_loads[i];
-  //   }
-  // }
-
-  // std::vector<double> joint_voltages;
-  // if (driver_->read_present_joint_voltages(&joint_voltages)) {
-  //   for (uint i = 0; i < hw_voltage_states_.size(); ++i) {
-  //     hw_voltage_states_[i] = joint_voltages[i];
-  //   }
-  // }
-
-  // std::vector<double> joint_temperatures;
-  // if (driver_->read_present_joint_temperatures(&joint_temperatures)) {
-  //   for (uint i = 0; i < hw_temperature_states_.size(); ++i) {
-  //     hw_temperature_states_[i] = joint_temperatures[i];
-  //   }
-  // }
-
-  prev_comm_timestamp_ = rclcpp::Clock().now();
   return return_type::OK;
 }
 
 return_type MiniVHardware::write()
 {
-  if (communication_timeout()) {
-    RCLCPP_ERROR(
-      rclcpp::get_logger("MiniVHardware"), "Communication timeout!");
-    return return_type::ERROR;
-  }
-  /*
-  if (!driver_->write_goal_joint_positions(hw_position_commands_)) {
-    RCLCPP_ERROR(
-      rclcpp::get_logger("MiniVHardware"),
-      driver_->get_last_error_log());
-    return return_type::ERROR;
-  }
-  */
-
-  prev_comm_timestamp_ = rclcpp::Clock().now();
   return return_type::OK;
-}
-
-bool MiniVHardware::communication_timeout()
-{
-  if (rclcpp::Clock().now().seconds() - prev_comm_timestamp_.seconds() >= timeout_seconds_) {
-    return true;
-  } else {
-    return false;
-  }
 }
 }  // namespace miniv_control
 
