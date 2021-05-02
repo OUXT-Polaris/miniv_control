@@ -68,6 +68,8 @@ public:
 
 private:
   std::shared_ptr<MiniVDriver> driver_;
+  double left_thrust_cmd_;
+  double right_thrust_cmd_;
 };
 }  // namespace miniv_control
 

@@ -61,6 +61,12 @@ std::vector<hardware_interface::CommandInterface>
 MiniVHardware::export_command_interfaces()
 {
   std::vector<hardware_interface::CommandInterface> command_interfaces = {};
+  command_interfaces.emplace_back(
+    hardware_interface::CommandInterface(
+      "left_thruster", hardware_interface::HW_IF_VELOCITY, &left_thrust_cmd_));
+  command_interfaces.emplace_back(
+    hardware_interface::CommandInterface(
+      "right_thruster", hardware_interface::HW_IF_VELOCITY, &right_thrust_cmd_));
   return command_interfaces;
 }
 
