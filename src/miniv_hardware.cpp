@@ -35,13 +35,15 @@ return_type MiniVHardware::configure(
   if (configure_default(info) != return_type::OK) {
     return return_type::ERROR;
   }
-  std::string thruster_ip_address = info_.hardware_parameters["thruster_ip_address"];
+  std::string thruster_ip_address = info_.hardware_parameters["ip_address"];
   int thruster_port = std::stoi(info_.hardware_parameters["port"]);
+  RCLCPP_INFO_STREAM(rclcpp::get_logger("MiniVHardware"), "Connecting to motor driver...");
+  RCLCPP_INFO_STREAM(rclcpp::get_logger("MiniVHardware"), "IP Address : " << thruster_ip_address);
+  RCLCPP_INFO_STREAM(rclcpp::get_logger("MiniVHardware"), "Port : " << thruster_port);
   try {
     driver_ = std::make_shared<MiniVDriver>(
       thruster_ip_address, thruster_port);
   } catch (const std::runtime_error & e) {
-    RCLCPP_ERROR(rclcpp::get_logger("MiniVHardware"), e.what());
     return return_type::ERROR;
   }
   status_ = hardware_interface::status::CONFIGURED;
