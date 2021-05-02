@@ -32,6 +32,8 @@ MiniVHardware::~MiniVHardware()
 return_type MiniVHardware::configure(
   const hardware_interface::HardwareInfo & info)
 {
+  left_thrust_cmd_ = 0;
+  right_thrust_cmd_ = 0;
   if (configure_default(info) != return_type::OK) {
     return return_type::ERROR;
   }
@@ -42,8 +44,12 @@ return_type MiniVHardware::configure(
   RCLCPP_INFO_STREAM(rclcpp::get_logger("MiniVHardware"), "Connecting to motor driver...");
   RCLCPP_INFO_STREAM(rclcpp::get_logger("MiniVHardware"), "IP Address : " << thruster_ip_address);
   RCLCPP_INFO_STREAM(rclcpp::get_logger("MiniVHardware"), "Port : " << thruster_port);
-  RCLCPP_INFO_STREAM(rclcpp::get_logger("MiniVHardware"), "Left Thruster Joint : " << left_thruster_joint_);
-  RCLCPP_INFO_STREAM(rclcpp::get_logger("MiniVHardware"), "Right Thruster Joint : " << right_thruster_joint_);
+  RCLCPP_INFO_STREAM(
+    rclcpp::get_logger(
+      "MiniVHardware"), "Left Thruster Joint : " << left_thruster_joint_);
+  RCLCPP_INFO_STREAM(
+    rclcpp::get_logger(
+      "MiniVHardware"), "Right Thruster Joint : " << right_thruster_joint_);
   try {
     driver_ = std::make_shared<MiniVDriver>(
       thruster_ip_address, thruster_port);
@@ -67,10 +73,10 @@ MiniVHardware::export_command_interfaces()
   std::vector<hardware_interface::CommandInterface> command_interfaces = {};
   command_interfaces.emplace_back(
     hardware_interface::CommandInterface(
-      "left_thruster", hardware_interface::HW_IF_VELOCITY, &left_thrust_cmd_));
+      left_thruster_joint_, hardware_interface::HW_IF_VELOCITY, &left_thrust_cmd_));
   command_interfaces.emplace_back(
     hardware_interface::CommandInterface(
-      "right_thruster", hardware_interface::HW_IF_VELOCITY, &right_thrust_cmd_));
+      right_thruster_joint_, hardware_interface::HW_IF_VELOCITY, &right_thrust_cmd_));
   return command_interfaces;
 }
 
@@ -88,11 +94,18 @@ return_type MiniVHardware::stop()
 
 return_type MiniVHardware::read()
 {
+  // RCLCPP_INFO_STREAM(rclcpp::get_logger("MiniVHardware"), __FILE__ << "," << __LINE__);
   return return_type::OK;
 }
 
 return_type MiniVHardware::write()
 {
+  RCLCPP_INFO_STREAM(
+    rclcpp::get_logger(
+      "MiniVHardware"), "Left Thruster Velocity Command : " << left_thrust_cmd_);
+  RCLCPP_INFO_STREAM(
+    rclcpp::get_logger(
+      "MiniVHardware"), "Right Thruster Velocity Command : " << right_thrust_cmd_);
   return return_type::OK;
 }
 }  // namespace miniv_control
