@@ -64,6 +64,12 @@ std::vector<hardware_interface::StateInterface>
 MiniVHardware::export_state_interfaces()
 {
   std::vector<hardware_interface::StateInterface> state_interfaces = {};
+  state_interfaces.emplace_back(
+    hardware_interface::StateInterface(
+      left_thruster_joint_, hardware_interface::HW_IF_VELOCITY, &left_thrust_cmd_));
+  state_interfaces.emplace_back(
+    hardware_interface::StateInterface(
+      right_thruster_joint_, hardware_interface::HW_IF_VELOCITY, &right_thrust_cmd_));
   return state_interfaces;
 }
 
@@ -100,12 +106,14 @@ return_type MiniVHardware::read()
 
 return_type MiniVHardware::write()
 {
+  /*
   RCLCPP_INFO_STREAM(
     rclcpp::get_logger(
       "MiniVHardware"), "Left Thruster Velocity Command : " << left_thrust_cmd_);
   RCLCPP_INFO_STREAM(
     rclcpp::get_logger(
       "MiniVHardware"), "Right Thruster Velocity Command : " << right_thrust_cmd_);
+  */
   return return_type::OK;
 }
 }  // namespace miniv_control
