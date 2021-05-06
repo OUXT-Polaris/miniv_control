@@ -106,15 +106,17 @@ return_type MiniVHardware::read()
 
 return_type MiniVHardware::write()
 {
-  /*
-  RCLCPP_INFO_STREAM(
-    rclcpp::get_logger(
-      "MiniVHardware"), "Left Thruster Velocity Command : " << left_thrust_cmd_);
-  RCLCPP_INFO_STREAM(
-    rclcpp::get_logger(
-      "MiniVHardware"), "Right Thruster Velocity Command : " << right_thrust_cmd_);
-  */
-  return return_type::OK;
+  driver_->setThrust(Motor::THRUSTER_LEFT, left_thrust_cmd_);
+  driver_->setThrust(Motor::TURUSTER_RIGHT, right_thrust_cmd_);
+  if(driver_->sendCommand())
+  {
+    return return_type::OK;
+  }
+  else
+  {
+    RCLCPP_ERROR_STREAM(rclcpp::get_logger("MiniVHardware"), "failed to send command.");
+    return return_type::ERROR;
+  }
 }
 }  // namespace miniv_control
 

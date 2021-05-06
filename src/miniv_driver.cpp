@@ -35,9 +35,18 @@ MiniVDriver::MiniVDriver(
   tcp_client_->connect(thruster_ip_address, thruster_port);
 }
 
-bool MiniVDriver::setThrust(const Motor & motor, double thrust)
+bool MiniVDriver::sendCommand()
 {
   nlohmann::json json;
+  json["left"] = left_thrust_;
+  json["right"] = right_thrust_;
+  std::string message = json.dump();
+  // RCLCPP_INFO_STREAM(rclcpp::get_logger("MiniVHardware"), "sending command : " << message);
+  return tcp_client_->send(message);
+}
+
+void MiniVDriver::setThrust(const Motor & motor, double thrust)
+{
   switch (motor) {
     case Motor::THRUSTER:
       left_thrust_ = thrust;
@@ -52,9 +61,5 @@ bool MiniVDriver::setThrust(const Motor & motor, double thrust)
     default:
       break;
   }
-  json["left_thrust"] = left_thrust_;
-  json["right_thrust"] = right_thrust_;
-  std::string message = json.dump();
-  return tcp_client_->send(message);
 }
 }  // namespace miniv_control
