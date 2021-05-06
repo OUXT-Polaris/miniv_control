@@ -108,12 +108,9 @@ return_type MiniVHardware::write()
 {
   driver_->setThrust(Motor::THRUSTER_LEFT, left_thrust_cmd_);
   driver_->setThrust(Motor::TURUSTER_RIGHT, right_thrust_cmd_);
-  if(driver_->sendCommand())
-  {
+  if (driver_->sendCommand()) {
     return return_type::OK;
-  }
-  else
-  {
+  } else {
     RCLCPP_ERROR_STREAM(rclcpp::get_logger("MiniVHardware"), "failed to send command.");
     return return_type::ERROR;
   }
