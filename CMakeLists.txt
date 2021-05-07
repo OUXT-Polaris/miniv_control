@@ -70,8 +70,4 @@ ament_export_dependencies(
   ros2_control
 )
 
-install(DIRECTORY config
-  DESTINATION share/${PROJECT_NAME}
-)
-
 ament_package()

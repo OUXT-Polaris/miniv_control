@@ -42,7 +42,8 @@ public:
 
   const std::string thruster_ip_address;
   const int thruster_port;
-  bool setThrust(const Motor & motor, double thrust);
+  void setThrust(const Motor & motor, double thrust);
+  bool sendCommand();
 
 private:
   double left_thrust_;

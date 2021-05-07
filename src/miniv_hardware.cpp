@@ -32,16 +32,28 @@ MiniVHardware::~MiniVHardware()
 return_type MiniVHardware::configure(
   const hardware_interface::HardwareInfo & info)
 {
+  left_thrust_cmd_ = 0;
+  right_thrust_cmd_ = 0;
   if (configure_default(info) != return_type::OK) {
     return return_type::ERROR;
   }
-  std::string thruster_ip_address = info_.hardware_parameters["thruster_ip_address"];
+  std::string thruster_ip_address = info_.hardware_parameters["ip_address"];
   int thruster_port = std::stoi(info_.hardware_parameters["port"]);
+  left_thruster_joint_ = info_.hardware_parameters["left_thruster_joint"];
+  right_thruster_joint_ = info_.hardware_parameters["right_thruster_joint"];
+  RCLCPP_INFO_STREAM(rclcpp::get_logger("MiniVHardware"), "Connecting to motor driver...");
+  RCLCPP_INFO_STREAM(rclcpp::get_logger("MiniVHardware"), "IP Address : " << thruster_ip_address);
+  RCLCPP_INFO_STREAM(rclcpp::get_logger("MiniVHardware"), "Port : " << thruster_port);
+  RCLCPP_INFO_STREAM(
+    rclcpp::get_logger(
+      "MiniVHardware"), "Left Thruster Joint : " << left_thruster_joint_);
+  RCLCPP_INFO_STREAM(
+    rclcpp::get_logger(
+      "MiniVHardware"), "Right Thruster Joint : " << right_thruster_joint_);
   try {
     driver_ = std::make_shared<MiniVDriver>(
       thruster_ip_address, thruster_port);
   } catch (const std::runtime_error & e) {
-    RCLCPP_ERROR(rclcpp::get_logger("MiniVHardware"), e.what());
     return return_type::ERROR;
   }
   status_ = hardware_interface::status::CONFIGURED;
@@ -52,6 +64,12 @@ std::vector<hardware_interface::StateInterface>
 MiniVHardware::export_state_interfaces()
 {
   std::vector<hardware_interface::StateInterface> state_interfaces = {};
+  state_interfaces.emplace_back(
+    hardware_interface::StateInterface(
+      left_thruster_joint_, hardware_interface::HW_IF_VELOCITY, &left_thrust_cmd_));
+  state_interfaces.emplace_back(
+    hardware_interface::StateInterface(
+      right_thruster_joint_, hardware_interface::HW_IF_VELOCITY, &right_thrust_cmd_));
   return state_interfaces;
 }
 
@@ -59,6 +77,12 @@ std::vector<hardware_interface::CommandInterface>
 MiniVHardware::export_command_interfaces()
 {
   std::vector<hardware_interface::CommandInterface> command_interfaces = {};
+  command_interfaces.emplace_back(
+    hardware_interface::CommandInterface(
+      left_thruster_joint_, hardware_interface::HW_IF_VELOCITY, &left_thrust_cmd_));
+  command_interfaces.emplace_back(
+    hardware_interface::CommandInterface(
+      right_thruster_joint_, hardware_interface::HW_IF_VELOCITY, &right_thrust_cmd_));
   return command_interfaces;
 }
 
@@ -76,12 +100,20 @@ return_type MiniVHardware::stop()
 
 return_type MiniVHardware::read()
 {
+  // RCLCPP_INFO_STREAM(rclcpp::get_logger("MiniVHardware"), __FILE__ << "," << __LINE__);
   return return_type::OK;
 }
 
 return_type MiniVHardware::write()
 {
-  return return_type::OK;
+  driver_->setThrust(Motor::THRUSTER_LEFT, left_thrust_cmd_);
+  driver_->setThrust(Motor::TURUSTER_RIGHT, right_thrust_cmd_);
+  if (driver_->sendCommand()) {
+    return return_type::OK;
+  } else {
+    RCLCPP_ERROR_STREAM(rclcpp::get_logger("MiniVHardware"), "failed to send command.");
+    return return_type::ERROR;
+  }
 }
 }  // namespace miniv_control
 
