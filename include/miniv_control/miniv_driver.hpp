@@ -38,10 +38,12 @@ class MiniVDriver
 public:
   MiniVDriver(
     const std::string & thruster_ip_address,
-    const int & thruster_port);
+    const int & thruster_port,
+    bool enable_dummy = true);
 
   const std::string thruster_ip_address;
   const int thruster_port;
+  const bool enable_dummy;
   void setThrust(const Motor & motor, double thrust);
   bool sendCommand();
 

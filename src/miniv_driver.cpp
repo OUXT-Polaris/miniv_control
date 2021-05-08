@@ -25,14 +25,18 @@ namespace miniv_control
 {
 MiniVDriver::MiniVDriver(
   const std::string & thruster_ip_address,
-  const int & thruster_port)
+  const int & thruster_port,
+  bool enable_dummy)
 : thruster_ip_address(thruster_ip_address),
-  thruster_port(thruster_port)
+  thruster_port(thruster_port),
+  enable_dummy(enable_dummy)
 {
-  boost::asio::io_service io_service;
-  tcp_client_ = std::make_unique<tcp_sender::TcpClient>(
-    io_service, rclcpp::get_logger("MiniVHardware"));
-  tcp_client_->connect(thruster_ip_address, thruster_port);
+  if (!enable_dummy) {
+    boost::asio::io_service io_service;
+    tcp_client_ = std::make_unique<tcp_sender::TcpClient>(
+      io_service, rclcpp::get_logger("MiniVHardware"));
+    tcp_client_->connect(thruster_ip_address, thruster_port);
+  }
 }
 
 bool MiniVDriver::sendCommand()
@@ -42,6 +46,9 @@ bool MiniVDriver::sendCommand()
   json["right"] = right_thrust_;
   std::string message = json.dump();
   // RCLCPP_INFO_STREAM(rclcpp::get_logger("MiniVHardware"), "sending command : " << message);
+  if (enable_dummy) {
+    return true;
+  }
   return tcp_client_->send(message);
 }
 
