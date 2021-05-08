@@ -45,7 +45,6 @@ return_type MiniVHardware::configure(
   if (info_.hardware_parameters["enable_dummy"] == "true" || info_.hardware_parameters["enable_dummy"] == "True") {
     enable_dummy = true;
   }
-  RCLCPP_ERROR_STREAM(rclcpp::get_logger("MiniVHardware"), info_.hardware_parameters["enable_dummy"]);
   RCLCPP_INFO_STREAM(rclcpp::get_logger("MiniVHardware"), "Connecting to motor driver...");
   RCLCPP_INFO_STREAM(rclcpp::get_logger("MiniVHardware"), "IP Address : " << thruster_ip_address);
   RCLCPP_INFO_STREAM(rclcpp::get_logger("MiniVHardware"), "Port : " << thruster_port);
