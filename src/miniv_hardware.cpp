@@ -41,6 +41,10 @@ return_type MiniVHardware::configure(
   int thruster_port = std::stoi(info_.hardware_parameters["port"]);
   left_thruster_joint_ = info_.hardware_parameters["left_thruster_joint"];
   right_thruster_joint_ = info_.hardware_parameters["right_thruster_joint"];
+  bool enable_dummy = false;
+  if (info_.hardware_parameters["enable_dummy"] == "true") {
+    enable_dummy = true;
+  }
   RCLCPP_INFO_STREAM(rclcpp::get_logger("MiniVHardware"), "Connecting to motor driver...");
   RCLCPP_INFO_STREAM(rclcpp::get_logger("MiniVHardware"), "IP Address : " << thruster_ip_address);
   RCLCPP_INFO_STREAM(rclcpp::get_logger("MiniVHardware"), "Port : " << thruster_port);
@@ -52,7 +56,7 @@ return_type MiniVHardware::configure(
       "MiniVHardware"), "Right Thruster Joint : " << right_thruster_joint_);
   try {
     driver_ = std::make_shared<MiniVDriver>(
-      thruster_ip_address, thruster_port);
+      thruster_ip_address, thruster_port, enable_dummy);
   } catch (const std::runtime_error & e) {
     return return_type::ERROR;
   }
