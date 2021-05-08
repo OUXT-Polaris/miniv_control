@@ -31,10 +31,12 @@ MiniVDriver::MiniVDriver(
   thruster_port(thruster_port),
   enable_dummy(enable_dummy)
 {
-  boost::asio::io_service io_service;
-  tcp_client_ = std::make_unique<tcp_sender::TcpClient>(
-    io_service, rclcpp::get_logger("MiniVHardware"));
-  tcp_client_->connect(thruster_ip_address, thruster_port);
+  if (!enable_dummy) {
+    boost::asio::io_service io_service;
+    tcp_client_ = std::make_unique<tcp_sender::TcpClient>(
+      io_service, rclcpp::get_logger("MiniVHardware"));
+    tcp_client_->connect(thruster_ip_address, thruster_port);
+  }
 }
 
 bool MiniVDriver::sendCommand()
