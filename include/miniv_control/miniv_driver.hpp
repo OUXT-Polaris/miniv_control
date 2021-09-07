@@ -15,31 +15,22 @@
 #ifndef MINIV_CONTROL__MINIV_DRIVER_HPP_
 #define MINIV_CONTROL__MINIV_DRIVER_HPP_
 
-#include <tcp_sender/tcp_client.hpp>
-
 #include <boost/optional.hpp>
-
-#include <string>
-#include <vector>
 #include <memory>
+#include <string>
+#include <tcp_sender/tcp_client.hpp>
 #include <unordered_map>
+#include <vector>
 
 namespace miniv_control
 {
-enum class Motor
-{
-  THRUSTER_LEFT,
-  TURUSTER_RIGHT,
-  THRUSTER
-};
+enum class Motor { THRUSTER_LEFT, TURUSTER_RIGHT, THRUSTER };
 
 class MiniVDriver
 {
 public:
   MiniVDriver(
-    const std::string & thruster_ip_address,
-    const int & thruster_port,
-    bool enable_dummy = true);
+    const std::string & thruster_ip_address, const int & thruster_port, bool enable_dummy = true);
 
   const std::string thruster_ip_address;
   const int thruster_port;

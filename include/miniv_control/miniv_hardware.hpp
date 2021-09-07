@@ -15,29 +15,25 @@
 #ifndef MINIV_CONTROL__MINIV_HARDWARE_HPP_
 #define MINIV_CONTROL__MINIV_HARDWARE_HPP_
 
-#include <miniv_control/visibility_control.hpp>
-#include <miniv_control/miniv_driver.hpp>
-
 #include <hardware_interface/base_interface.hpp>
 #include <hardware_interface/handle.hpp>
 #include <hardware_interface/hardware_info.hpp>
 #include <hardware_interface/system_interface.hpp>
 #include <hardware_interface/types/hardware_interface_return_values.hpp>
 #include <hardware_interface/types/hardware_interface_status_values.hpp>
-
+#include <memory>
+#include <miniv_control/miniv_driver.hpp>
+#include <miniv_control/visibility_control.hpp>
 #include <rclcpp/macros.hpp>
 #include <rclcpp/rclcpp.hpp>
-
-#include <vector>
-#include <memory>
 #include <string>
+#include <vector>
 
 using hardware_interface::return_type;
 
 namespace miniv_control
 {
-class MiniVHardware : public
-  hardware_interface::BaseInterface<hardware_interface::SystemInterface>
+class MiniVHardware : public hardware_interface::BaseInterface<hardware_interface::SystemInterface>
 {
 public:
   RCLCPP_SHARED_PTR_DEFINITIONS(MiniVHardware)

@@ -12,29 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <memory>
 #include <miniv_control/constants.hpp>
 #include <miniv_control/miniv_driver.hpp>
-
-#include <rclcpp/rclcpp.hpp>
 #include <nlohmann/json.hpp>
-
+#include <rclcpp/rclcpp.hpp>
 #include <string>
-#include <memory>
 
 namespace miniv_control
 {
 MiniVDriver::MiniVDriver(
-  const std::string & thruster_ip_address,
-  const int & thruster_port,
-  bool enable_dummy)
-: thruster_ip_address(thruster_ip_address),
-  thruster_port(thruster_port),
-  enable_dummy(enable_dummy)
+  const std::string & thruster_ip_address, const int & thruster_port, bool enable_dummy)
+: thruster_ip_address(thruster_ip_address), thruster_port(thruster_port), enable_dummy(enable_dummy)
 {
   if (!enable_dummy) {
     boost::asio::io_service io_service;
-    tcp_client_ = std::make_unique<tcp_sender::TcpClient>(
-      io_service, rclcpp::get_logger("MiniVHardware"));
+    tcp_client_ =
+      std::make_unique<tcp_sender::TcpClient>(io_service, rclcpp::get_logger("MiniVHardware"));
     tcp_client_->connect(thruster_ip_address, thruster_port);
   }
 }
