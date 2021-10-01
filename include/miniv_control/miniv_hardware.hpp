@@ -15,12 +15,20 @@
 #ifndef MINIV_CONTROL__MINIV_HARDWARE_HPP_
 #define MINIV_CONTROL__MINIV_HARDWARE_HPP_
 
+#if GALACTIC
+#include <hardware_interface/system_interface.hpp>
+#else
 #include <hardware_interface/base_interface.hpp>
+#endif
 #include <hardware_interface/handle.hpp>
 #include <hardware_interface/hardware_info.hpp>
 #include <hardware_interface/system_interface.hpp>
 #include <hardware_interface/types/hardware_interface_return_values.hpp>
+#if GALACTIC
+#include <hardware_interface/types/hardware_interface_type_values.hpp>
+#else
 #include <hardware_interface/types/hardware_interface_status_values.hpp>
+#endif
 #include <memory>
 #include <miniv_control/miniv_driver.hpp>
 #include <miniv_control/visibility_control.hpp>
@@ -33,7 +41,12 @@ using hardware_interface::return_type;
 
 namespace miniv_control
 {
-class MiniVHardware : public hardware_interface::BaseInterface<hardware_interface::SystemInterface>
+class MiniVHardware
+#if GALACTIC
+: public hardware_interface::SystemInterface
+#else
+: public hardware_interface::BaseInterface<hardware_interface::SystemInterface>
+#endif
 {
 public:
   RCLCPP_SHARED_PTR_DEFINITIONS(MiniVHardware)
@@ -41,8 +54,14 @@ public:
   MINIV_CONTROL_PUBLIC
   ~MiniVHardware();
 
+#if GALACTIC
   MINIV_CONTROL_PUBLIC
-  return_type configure(const hardware_interface::HardwareInfo & info) override;
+  rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn on_init(
+    const hardware_interface::HardwareInfo & info) override;
+#else
+  MINIV_CONTROL_PUBLIC
+  hardware_interface::return_type configure(const hardware_interface::HardwareInfo & info) override;
+#endif
 
   MINIV_CONTROL_PUBLIC
   std::vector<hardware_interface::StateInterface> export_state_interfaces() override;
@@ -50,11 +69,13 @@ public:
   MINIV_CONTROL_PUBLIC
   std::vector<hardware_interface::CommandInterface> export_command_interfaces() override;
 
+#ifndef GALACTIC
   MINIV_CONTROL_PUBLIC
   return_type start() override;
 
   MINIV_CONTROL_PUBLIC
   return_type stop() override;
+#endif
 
   MINIV_CONTROL_PUBLIC
   return_type read() override;
