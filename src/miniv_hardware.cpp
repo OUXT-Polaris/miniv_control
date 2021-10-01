@@ -25,13 +25,30 @@ namespace miniv_control
 {
 MiniVHardware::~MiniVHardware() {}
 
+#if GALACTIC
+rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn MiniVHardware::on_init(
+  const hardware_interface::HardwareInfo & info)
+#else
 return_type MiniVHardware::configure(const hardware_interface::HardwareInfo & info)
+#endif
 {
+#if GALACTIC
+  if (
+    SystemInterface::on_init(info) !=
+    rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS) {
+    return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::ERROR;
+  }
+#else
+  if (configure_default(info) != hardware_interface::return_type::OK) {
+#if GALACTIC
+    return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::ERROR;
+#else
+    return return_type::ERROR;
+#endif
+  }
+#endif
   left_thrust_cmd_ = 0;
   right_thrust_cmd_ = 0;
-  if (configure_default(info) != return_type::OK) {
-    return return_type::ERROR;
-  }
   std::string thruster_ip_address = info_.hardware_parameters["ip_address"];
   int thruster_port = std::stoi(info_.hardware_parameters["port"]);
   left_thruster_joint_ = info_.hardware_parameters["left_thruster_joint"];
@@ -52,10 +69,17 @@ return_type MiniVHardware::configure(const hardware_interface::HardwareInfo & in
   try {
     driver_ = std::make_shared<MiniVDriver>(thruster_ip_address, thruster_port, enable_dummy);
   } catch (const std::runtime_error & e) {
+#if GALACTIC
+    return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::ERROR;
+#else
     return return_type::ERROR;
+#endif
   }
-  status_ = hardware_interface::status::CONFIGURED;
+#if GALACTIC
+  return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
+#else
   return return_type::OK;
+#endif
 }
 
 std::vector<hardware_interface::StateInterface> MiniVHardware::export_state_interfaces()
@@ -78,6 +102,7 @@ std::vector<hardware_interface::CommandInterface> MiniVHardware::export_command_
   return command_interfaces;
 }
 
+#ifndef GALACTIC
 return_type MiniVHardware::start()
 {
   status_ = hardware_interface::status::STARTED;
@@ -89,6 +114,7 @@ return_type MiniVHardware::stop()
   status_ = hardware_interface::status::STOPPED;
   return return_type::OK;
 }
+#endif
 
 return_type MiniVHardware::read()
 {
