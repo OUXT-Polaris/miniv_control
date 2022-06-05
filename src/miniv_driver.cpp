@@ -52,7 +52,7 @@ namespace miniv_control
   {
     const int value_num = 2;
     const uint8_t length = sizeof(double) * value_num;
-    uint8_t message[3 + length] = {0};
+    uint8_t message[4 + length] = {0};
     uint8_t *period_array = reinterpret_cast<uint8_t *>(&period);
     uint8_t *duty_array = reinterpret_cast<uint8_t *>(&duty);
     message[0] = header1;
@@ -69,7 +69,7 @@ namespace miniv_control
     {
       return true;
     }
-    return tcp_client_->send(message, 3 + length);
+    return tcp_client_->send(message, 4 + length);
   }
 
   void MiniVDriver::setThrust(const Motor &motor, double thrust)
