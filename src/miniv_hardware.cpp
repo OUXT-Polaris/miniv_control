@@ -35,8 +35,7 @@ return_type MiniVHardware::configure(const hardware_interface::HardwareInfo & in
 #if GALACTIC
   if (
     SystemInterface::on_init(info) !=
-    rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS)
-  {
+    rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS) {
     return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::ERROR;
   }
 #else
@@ -57,8 +56,7 @@ return_type MiniVHardware::configure(const hardware_interface::HardwareInfo & in
   bool enable_dummy = false;
   if (
     info_.hardware_parameters["enable_dummy"] == "true" ||
-    info_.hardware_parameters["enable_dummy"] == "True")
-  {
+    info_.hardware_parameters["enable_dummy"] == "True") {
     enable_dummy = true;
   }
   RCLCPP_INFO_STREAM(rclcpp::get_logger("MiniVHardware"), "Connecting to motor driver...");
@@ -87,24 +85,20 @@ return_type MiniVHardware::configure(const hardware_interface::HardwareInfo & in
 std::vector<hardware_interface::StateInterface> MiniVHardware::export_state_interfaces()
 {
   std::vector<hardware_interface::StateInterface> state_interfaces = {};
-  state_interfaces.emplace_back(
-    hardware_interface::StateInterface(
-      left_thruster_joint_, hardware_interface::HW_IF_VELOCITY, &left_thrust_cmd_));
-  state_interfaces.emplace_back(
-    hardware_interface::StateInterface(
-      right_thruster_joint_, hardware_interface::HW_IF_VELOCITY, &right_thrust_cmd_));
+  state_interfaces.emplace_back(hardware_interface::StateInterface(
+    left_thruster_joint_, hardware_interface::HW_IF_VELOCITY, &left_thrust_cmd_));
+  state_interfaces.emplace_back(hardware_interface::StateInterface(
+    right_thruster_joint_, hardware_interface::HW_IF_VELOCITY, &right_thrust_cmd_));
   return state_interfaces;
 }
 
 std::vector<hardware_interface::CommandInterface> MiniVHardware::export_command_interfaces()
 {
   std::vector<hardware_interface::CommandInterface> command_interfaces = {};
-  command_interfaces.emplace_back(
-    hardware_interface::CommandInterface(
-      left_thruster_joint_, hardware_interface::HW_IF_VELOCITY, &left_thrust_cmd_));
-  command_interfaces.emplace_back(
-    hardware_interface::CommandInterface(
-      right_thruster_joint_, hardware_interface::HW_IF_VELOCITY, &right_thrust_cmd_));
+  command_interfaces.emplace_back(hardware_interface::CommandInterface(
+    left_thruster_joint_, hardware_interface::HW_IF_VELOCITY, &left_thrust_cmd_));
+  command_interfaces.emplace_back(hardware_interface::CommandInterface(
+    right_thruster_joint_, hardware_interface::HW_IF_VELOCITY, &right_thrust_cmd_));
   return command_interfaces;
 }
 

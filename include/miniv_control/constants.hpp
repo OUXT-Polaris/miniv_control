@@ -21,7 +21,7 @@
 namespace miniv_control
 {
 constexpr double PROTOCOL_VERSION = 1.0;
-constexpr int DXL_HOME_POSITION = 511;     // value range:0 ~ 1023
+constexpr int DXL_HOME_POSITION = 511;  // value range:0 ~ 1023
 constexpr double DXL_MAX_POSITION = 1023.0;
 constexpr double DXL_MAX_POSITION_DEGREES = 300.0;
 constexpr double TO_RADIANS = (DXL_MAX_POSITION_DEGREES / DXL_MAX_POSITION) * M_PI / 180.0;
@@ -51,6 +51,6 @@ constexpr uint8_t header1 = 0xFF;
 constexpr uint8_t header2 = 0xFE;
 constexpr uint8_t end = 0xFD;
 
-} // namespace miniv_control
+}  // namespace miniv_control
 
-#endif // MINIV_CONTROL__CONSTANTS_HPP_
+#endif  // MINIV_CONTROL__CONSTANTS_HPP_

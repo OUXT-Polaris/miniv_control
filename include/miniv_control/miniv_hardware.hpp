@@ -43,9 +43,9 @@ namespace miniv_control
 {
 class MiniVHardware
 #if GALACTIC
-  : public hardware_interface::SystemInterface
+: public hardware_interface::SystemInterface
 #else
-  : public hardware_interface::BaseInterface<hardware_interface::SystemInterface>
+: public hardware_interface::BaseInterface<hardware_interface::SystemInterface>
 #endif
 {
 public:

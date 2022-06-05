@@ -86,4 +86,4 @@ void MiniVDriver::setThrust(const Motor & motor, double thrust)
   }
 }
 
-} // namespace miniv_control
+}  // namespace miniv_control

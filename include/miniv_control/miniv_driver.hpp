@@ -24,12 +24,7 @@
 
 namespace miniv_control
 {
-enum class Motor
-{
-  THRUSTER_LEFT,
-  TURUSTER_RIGHT,
-  THRUSTER
-};
+enum class Motor { THRUSTER_LEFT, TURUSTER_RIGHT, THRUSTER };
 
 class MiniVDriver
 {
@@ -49,6 +44,6 @@ private:
   double right_thrust_;
   std::unique_ptr<tcp_sender::TcpClient> tcp_client_;
 };
-} // namespace miniv_control
+}  // namespace miniv_control
 
-#endif // MINIV_CONTROL__MINIV_DRIVER_HPP_
+#endif  // MINIV_CONTROL__MINIV_DRIVER_HPP_
