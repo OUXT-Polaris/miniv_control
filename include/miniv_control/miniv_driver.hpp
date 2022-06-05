@@ -24,31 +24,31 @@
 
 namespace miniv_control
 {
-  enum class Motor
-  {
-    THRUSTER_LEFT,
-    TURUSTER_RIGHT,
-    THRUSTER
-  };
+enum class Motor
+{
+  THRUSTER_LEFT,
+  TURUSTER_RIGHT,
+  THRUSTER
+};
 
-  class MiniVDriver
-  {
-  public:
-    MiniVDriver(
-        const std::string &thruster_ip_address, const int &thruster_port, bool enable_dummy = true);
+class MiniVDriver
+{
+public:
+  MiniVDriver(
+    const std::string & thruster_ip_address, const int & thruster_port, bool enable_dummy = true);
 
-    const std::string thruster_ip_address;
-    const int thruster_port;
-    const bool enable_dummy;
-    void setThrust(const Motor &motor, double thrust);
-    bool sendCommand();
-    bool sendCommandtoMbed(double period, double duty);
+  const std::string thruster_ip_address;
+  const int thruster_port;
+  const bool enable_dummy;
+  void setThrust(const Motor & motor, double thrust);
+  bool sendCommand();
+  bool sendCommandtoMbed(double period, double duty);
 
-  private:
-    double left_thrust_;
-    double right_thrust_;
-    std::unique_ptr<tcp_sender::TcpClient> tcp_client_;
-  };
+private:
+  double left_thrust_;
+  double right_thrust_;
+  std::unique_ptr<tcp_sender::TcpClient> tcp_client_;
+};
 } // namespace miniv_control
 
 #endif // MINIV_CONTROL__MINIV_DRIVER_HPP_
