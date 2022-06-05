@@ -21,34 +21,61 @@
 
 namespace miniv_control
 {
-MiniVDriver::MiniVDriver(
-  const std::string & thruster_ip_address, const int & thruster_port, bool enable_dummy)
-: thruster_ip_address(thruster_ip_address), thruster_port(thruster_port), enable_dummy(enable_dummy)
-{
-  if (!enable_dummy) {
-    boost::asio::io_service io_service;
-    tcp_client_ =
-      std::make_unique<tcp_sender::TcpClient>(io_service, rclcpp::get_logger("MiniVHardware"));
-    tcp_client_->connect(thruster_ip_address, thruster_port);
+  MiniVDriver::MiniVDriver(
+      const std::string &thruster_ip_address, const int &thruster_port, bool enable_dummy)
+      : thruster_ip_address(thruster_ip_address), thruster_port(thruster_port), enable_dummy(enable_dummy)
+  {
+    if (!enable_dummy)
+    {
+      boost::asio::io_service io_service;
+      tcp_client_ =
+          std::make_unique<tcp_sender::TcpClient>(io_service, rclcpp::get_logger("MiniVHardware"));
+      tcp_client_->connect(thruster_ip_address, thruster_port);
+    }
   }
-}
 
-bool MiniVDriver::sendCommand()
-{
-  nlohmann::json json;
-  json["left"] = left_thrust_;
-  json["right"] = right_thrust_;
-  std::string message = json.dump();
-  // RCLCPP_INFO_STREAM(rclcpp::get_logger("MiniVHardware"), "sending command : " << message);
-  if (enable_dummy) {
-    return true;
+  bool MiniVDriver::sendCommand()
+  {
+    nlohmann::json json;
+    json["left"] = left_thrust_;
+    json["right"] = right_thrust_;
+    std::string message = json.dump();
+    // RCLCPP_INFO_STREAM(rclcpp::get_logger("MiniVHardware"), "sending command : " << message);
+    if (enable_dummy)
+    {
+      return true;
+    }
+    return tcp_client_->send(message);
   }
-  return tcp_client_->send(message);
-}
 
-void MiniVDriver::setThrust(const Motor & motor, double thrust)
-{
-  switch (motor) {
+  bool MiniVDriver::sendCommandtoMbed(double period, double duty)
+  {
+    const int value_num = 2;
+    const uint8_t length = sizeof(double) * value_num;
+    uint8_t message[3 + length] = {0};
+    uint8_t *period_array = reinterpret_cast<uint8_t *>(&period);
+    uint8_t *duty_array = reinterpret_cast<uint8_t *>(&duty);
+    message[0] = header1;
+    message[1] = header2;
+    message[2] = length;
+    for (unsigned int i = 0; i < sizeof(double); i++)
+    {
+      message[3 + i] = period_array[i];
+      message[3 + sizeof(double) + i] = duty_array[i];
+    }
+    message[3 + length] = end;
+    // RCLCPP_INFO_STREAM(rclcpp::get_logger("MiniVHardware"), "sending command : " << message);
+    if (enable_dummy)
+    {
+      return true;
+    }
+    return tcp_client_->send(message, 3 + length);
+  }
+
+  void MiniVDriver::setThrust(const Motor &motor, double thrust)
+  {
+    switch (motor)
+    {
     case Motor::THRUSTER:
       left_thrust_ = thrust;
       right_thrust_ = thrust;
@@ -61,6 +88,7 @@ void MiniVDriver::setThrust(const Motor & motor, double thrust)
       break;
     default:
       break;
+    }
   }
-}
-}  // namespace miniv_control
+
+} // namespace miniv_control
