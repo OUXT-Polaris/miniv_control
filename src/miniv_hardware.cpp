@@ -25,14 +25,14 @@ namespace miniv_control
 {
 MiniVHardware::~MiniVHardware() {}
 
-#if GALACTIC
+#if defined(GALACTIC) || defined(HUMBLE)
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn MiniVHardware::on_init(
   const hardware_interface::HardwareInfo & info)
 #else
 return_type MiniVHardware::configure(const hardware_interface::HardwareInfo & info)
 #endif
 {
-#if GALACTIC
+#if defined(GALACTIC) || defined(HUMBLE)
   if (
     SystemInterface::on_init(info) !=
     rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS) {
@@ -40,7 +40,7 @@ return_type MiniVHardware::configure(const hardware_interface::HardwareInfo & in
   }
 #else
   if (configure_default(info) != hardware_interface::return_type::OK) {
-#if GALACTIC
+#if defined(GALACTIC) || defined(HUMBLE)
     return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::ERROR;
 #else
     return return_type::ERROR;
@@ -69,13 +69,13 @@ return_type MiniVHardware::configure(const hardware_interface::HardwareInfo & in
   try {
     driver_ = std::make_shared<MiniVDriver>(thruster_ip_address, thruster_port, enable_dummy);
   } catch (const std::runtime_error & e) {
-#if GALACTIC
+#if defined(GALACTIC) || defined(HUMBLE)
     return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::ERROR;
 #else
     return return_type::ERROR;
 #endif
   }
-#if GALACTIC
+#if defined(GALACTIC) || defined(HUMBLE)
   return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 #else
   return return_type::OK;
