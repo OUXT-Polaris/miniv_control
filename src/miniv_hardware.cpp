@@ -102,27 +102,27 @@ std::vector<hardware_interface::CommandInterface> MiniVHardware::export_command_
   return command_interfaces;
 }
 
-#ifndef GALACTIC
-return_type MiniVHardware::start()
-{
-  status_ = hardware_interface::status::STARTED;
-  return return_type::OK;
-}
+// #ifndef GALACTIC
+// return_type MiniVHardware::start()
+// {
+//   status_ = hardware_interface::status::STARTED;
+//   return return_type::OK;
+// }
 
-return_type MiniVHardware::stop()
-{
-  status_ = hardware_interface::status::STOPPED;
-  return return_type::OK;
-}
-#endif
+// return_type MiniVHardware::stop()
+// {
+//   status_ = hardware_interface::status::STOPPED;
+//   return return_type::OK;
+// }
+// #endif
 
-return_type MiniVHardware::read()
+return_type MiniVHardware::read(const rclcpp::Time & time, const rclcpp::Duration & period)
 {
   // RCLCPP_INFO_STREAM(rclcpp::get_logger("MiniVHardware"), __FILE__ << "," << __LINE__);
   return return_type::OK;
 }
 
-return_type MiniVHardware::write()
+return_type MiniVHardware::write(const rclcpp::Time & time, const rclcpp::Duration & period)
 {
   driver_->setThrust(Motor::THRUSTER_LEFT, left_thrust_cmd_);
   driver_->setThrust(Motor::TURUSTER_RIGHT, right_thrust_cmd_);
