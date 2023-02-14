@@ -69,13 +69,13 @@ public:
   MINIV_CONTROL_PUBLIC
   std::vector<hardware_interface::CommandInterface> export_command_interfaces() override;
 
-// #ifndef GALACTIC
-//   MINIV_CONTROL_PUBLIC
-//   return_type start() override;
+  // #ifndef GALACTIC
+  //   MINIV_CONTROL_PUBLIC
+  //   return_type start() override;
 
-//   MINIV_CONTROL_PUBLIC
-//   return_type stop() override;
-// #endif
+  //   MINIV_CONTROL_PUBLIC
+  //   return_type stop() override;
+  // #endif
 
   MINIV_CONTROL_PUBLIC
   return_type read(const rclcpp::Time & time, const rclcpp::Duration & period) override;
