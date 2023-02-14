@@ -25,14 +25,14 @@ namespace miniv_control
 {
 MiniVHardware::~MiniVHardware() {}
 
-#if GALACTIC
+#if defined(GALACTIC) || defined(HUMBLE)
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn MiniVHardware::on_init(
   const hardware_interface::HardwareInfo & info)
 #else
 return_type MiniVHardware::configure(const hardware_interface::HardwareInfo & info)
 #endif
 {
-#if GALACTIC
+#if defined(GALACTIC) || defined(HUMBLE)
   if (
     SystemInterface::on_init(info) !=
     rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS) {
@@ -40,7 +40,7 @@ return_type MiniVHardware::configure(const hardware_interface::HardwareInfo & in
   }
 #else
   if (configure_default(info) != hardware_interface::return_type::OK) {
-#if GALACTIC
+#if defined(GALACTIC) || defined(HUMBLE)
     return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::ERROR;
 #else
     return return_type::ERROR;
@@ -69,13 +69,13 @@ return_type MiniVHardware::configure(const hardware_interface::HardwareInfo & in
   try {
     driver_ = std::make_shared<MiniVDriver>(thruster_ip_address, thruster_port, enable_dummy);
   } catch (const std::runtime_error & e) {
-#if GALACTIC
+#if defined(GALACTIC) || defined(HUMBLE)
     return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::ERROR;
 #else
     return return_type::ERROR;
 #endif
   }
-#if GALACTIC
+#if defined(GALACTIC) || defined(HUMBLE)
   return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
 #else
   return return_type::OK;
@@ -102,27 +102,27 @@ std::vector<hardware_interface::CommandInterface> MiniVHardware::export_command_
   return command_interfaces;
 }
 
-#ifndef GALACTIC
-return_type MiniVHardware::start()
-{
-  status_ = hardware_interface::status::STARTED;
-  return return_type::OK;
-}
+// #ifndef GALACTIC
+// return_type MiniVHardware::start()
+// {
+//   status_ = hardware_interface::status::STARTED;
+//   return return_type::OK;
+// }
 
-return_type MiniVHardware::stop()
-{
-  status_ = hardware_interface::status::STOPPED;
-  return return_type::OK;
-}
-#endif
+// return_type MiniVHardware::stop()
+// {
+//   status_ = hardware_interface::status::STOPPED;
+//   return return_type::OK;
+// }
+// #endif
 
-return_type MiniVHardware::read()
+return_type MiniVHardware::read(const rclcpp::Time & time, const rclcpp::Duration & period)
 {
   // RCLCPP_INFO_STREAM(rclcpp::get_logger("MiniVHardware"), __FILE__ << "," << __LINE__);
   return return_type::OK;
 }
 
-return_type MiniVHardware::write()
+return_type MiniVHardware::write(const rclcpp::Time & time, const rclcpp::Duration & period)
 {
   driver_->setThrust(Motor::THRUSTER_LEFT, left_thrust_cmd_);
   driver_->setThrust(Motor::TURUSTER_RIGHT, right_thrust_cmd_);
